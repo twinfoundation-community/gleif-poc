@@ -1,0 +1,50 @@
+# backend service for the vLEI linkage verifier
+# run with: docker compose -f docker-compose.backend.yaml up -d
+# or just: ./start.sh --with-backend
+
+networks:
+  vlei:
+    external: true
+  # host network access for external APIs (IOTA testnet)
+  default:
+    driver: bridge
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: src/app/backend/Dockerfile
+    container_name: vlei-backend
+    networks:
+      - vlei
+      - default
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    ports:
+      - "3000:80"
+    environment:
+      # port 80 internally so did:webs resolution works without port encoding
+      # did:webs:backend:keri:AID -> http://backend/keri/{AID}/did.json
+      - PORT=80
+      # container hostnames within the docker network
+      - SALLY_URL=http://direct-sally:9823
+      - KERIA_URL=http://keria1:3901
+      - KERIA_BOOT_URL=http://keria1:3903
+      - DID_WEBS_RESOLVER_URL=http://did-webs-resolver:7677
+      - IOTA_NODE_URL=https://api.testnet.iota.cafe
+      # trust anchors config path (mounted volume)
+      - TRUST_ANCHORS_PATH=/app/config/.trust-anchors.json
+      # NFT minting -- set NFT_MNEMONIC to enable actual minting
+      - NFT_MNEMONIC=${NFT_MNEMONIC:-}
+      - NFT_IDENTITY=${NFT_IDENTITY:-attestation-service}
+    volumes:
+      # mount trust anchors config from scripts/
+      - ../scripts/.trust-anchors.json:/app/config/.trust-anchors.json:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--tries=1", "--no-verbose", "http://127.0.0.1:80/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped

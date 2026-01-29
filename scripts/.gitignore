@@ -1,0 +1,8 @@
+# Dependencies
+node_modules/
+
+# Trust anchor configuration (contains passcodes)
+.trust-anchors.json
+
+# pnpm
+.pnpm-debug.log
