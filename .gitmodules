@@ -1,0 +1,3 @@
+[submodule "qvi-software"]
+	path = qvi-software
+	url = https://github.com/GLEIF-IT/qvi-software.git
