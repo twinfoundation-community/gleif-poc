@@ -1,0 +1,37 @@
+{
+  "name": "@gleif/verifier-node",
+  "version": "0.1.0",
+  "description": "Node.js utilities for GLEIF vLEI verification with IOTA DID integration",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@gleif/verifier-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@iota/identity-wasm": "^1.7.0",
+    "@twin.org/core": "*",
+    "@twin.org/dlt-iota": "*",
+    "@twin.org/vault-models": "*",
+    "signify-ts": ">=0.2.0"
+  },
+  "devDependencies": {
+    "@iota/identity-wasm": "1.7.0-beta.1",
+    "@twin.org/core": "next",
+    "@twin.org/dlt-iota": "next",
+    "@twin.org/vault-models": "next",
+    "signify-ts": "0.3.0-rc1",
+    "typescript": "^5.3.0"
+  }
+}
