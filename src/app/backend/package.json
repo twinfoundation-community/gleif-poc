@@ -1,0 +1,42 @@
+{
+  "name": "backend",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tspc",
+    "start": "node dist/index.js",
+    "prepare": "ts-patch install -s"
+  },
+  "dependencies": {
+    "@gleif/verifier-core": "workspace:*",
+    "@gleif/verifier-node": "workspace:*",
+    "@iota/iota-sdk": "^1.10.1",
+    "@twin.org/core": "next",
+    "@twin.org/dlt-iota": "next",
+    "@twin.org/entity-storage-connector-memory": "next",
+    "@twin.org/entity-storage-models": "next",
+    "@twin.org/identity-connector-iota": "next",
+    "@twin.org/identity-models": "next",
+    "@twin.org/nameof": "next",
+    "@twin.org/nft-connector-iota": "next",
+    "@twin.org/nft-models": "next",
+    "@twin.org/vault-connector-entity-storage": "next",
+    "@twin.org/vault-models": "next",
+    "@twin.org/wallet-connector-iota": "next",
+    "@twin.org/wallet-models": "next",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^5.0.0",
+    "signify-ts": "0.3.0-rc1"
+  },
+  "devDependencies": {
+    "@twin.org/nameof-transformer": "next",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "ts-patch": "^3.3.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}
