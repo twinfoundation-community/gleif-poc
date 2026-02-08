@@ -55,7 +55,7 @@ interface DidWebsDocument extends DIDDocument {
 export class KelPublisher {
   private readonly schemaSaid: string;
   private readonly cacheTtl: number;
-  private daCache: { ids: string[]; said: string; fetchedAt: number } | null = null;
+  private daCache: Map<string, { ids: string[]; said: string; fetchedAt: number }> = new Map();
 
   /**
    * @param config - publisher config
@@ -74,8 +74,9 @@ export class KelPublisher {
     client: SignifyClient,
     aid: string,
   ): Promise<{ ids: string[]; said: string } | null> {
-    if (this.daCache && (Date.now() - this.daCache.fetchedAt) < this.cacheTtl) {
-      return { ids: this.daCache.ids, said: this.daCache.said };
+    const cached = this.daCache.get(aid);
+    if (cached && (Date.now() - cached.fetchedAt) < this.cacheTtl) {
+      return { ids: cached.ids, said: cached.said };
     }
     try {
       const allCreds = await client.credentials().list();
@@ -87,12 +88,13 @@ export class KelPublisher {
       );
       const sad = (cred as { sad?: { d?: string; a?: { ids?: unknown[] } } })?.sad;
       if (sad?.d && sad?.a?.ids && Array.isArray(sad.a.ids)) {
-        this.daCache = {
+        const entry = {
           ids: sad.a.ids as string[],
           said: sad.d,
           fetchedAt: Date.now(),
         };
-        return { ids: this.daCache.ids, said: this.daCache.said };
+        this.daCache.set(aid, entry);
+        return { ids: entry.ids, said: entry.said };
       }
       return null;
     } catch {
