@@ -1,0 +1,9 @@
+[package]
+name = "vlei_attestation"
+edition = "2024"
+
+[dependencies]
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "mainnet" }
+
+[addresses]
+vlei_attestation = "0x0"

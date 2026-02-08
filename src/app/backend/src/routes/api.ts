@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { getPublicConfig, loadTrustAnchors, getEnvConfig } from '../services/config';
 import { verifyLeCredential, checkSallyStatus } from '../services/sally-client';
-import { mintAttestationNft, type LinkageInfo, type TrustChainInfo } from '../services/nft-service';
+import { mintAttestationNft, type LinkageInfo, type TrustChainInfo } from '../services/attestation-service';
 import { resolveVerification } from '../services/verification-state';
 import { resolveDid } from '../services/did-webs-client';
 import { verifyDidLinking } from '../services/did-linking-verifier';
@@ -84,12 +84,11 @@ router.post('/verify', async (_req: Request, res: Response, next: NextFunction) 
 
 /**
  * POST /api/nft/mint
- * Mint an IRC27 attestation NFT for a successful verification
+ * Mint a vLEI linkage attestation on IOTA
  */
 router.post('/nft/mint', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Use the last verification result or one provided in the request
-    const verificationResult = req.body?.verificationResult || lastVerificationResult;
+    const verificationResult = lastVerificationResult;
 
     if (!verificationResult) {
       res.status(400).json({
@@ -106,7 +105,6 @@ router.post('/nft/mint', async (req: Request, res: Response, next: NextFunction)
       return;
     }
 
-    // Get linkage and trust chain info from config
     let linkageInfo: LinkageInfo | undefined;
     let trustChainInfo: TrustChainInfo | undefined;
 
@@ -125,7 +123,7 @@ router.post('/nft/mint', async (req: Request, res: Response, next: NextFunction)
         qviCredentialSaid: config.qviCredential.said,
       };
 
-      console.log('Minting IRC27 attestation NFT with linkage info:', linkageInfo);
+      console.log('Minting vLEI attestation with linkage info:', linkageInfo);
     } catch (configError) {
       console.warn('Could not load trust anchors config, minting with minimal info');
     }
@@ -232,7 +230,6 @@ router.post('/verify-did-linking', async (req: Request, res: Response, next: Nex
 router.post('/iota/create-did', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { controller } = req.body;
-    // Pass undefined if no controller specified - service will use configured identity
     const result = await createIotaDid(controller);
     res.json({
       ...result,
@@ -261,7 +258,6 @@ router.post('/iota/add-service', async (req: Request, res: Response, next: NextF
       return;
     }
 
-    // Controller is optional - service will use configured identity if not provided
     await addServiceToIotaDid(controller, documentId, serviceId, serviceType, endpoint);
     res.json({
       success: true,
@@ -409,10 +405,8 @@ router.get('/verify-linkage/from-iota/:did', async (req: Request, res: Response,
       leAid: websVerification.leAid,
       leLei: websVerification.leLei,
       timestamp: isoTimestamp(),
-      // Include full documents
       iotaDocument: iotaDoc,
       websDocument: websVerification.websDocument,
-      // Include alsoKnownAs from both documents
       iotaAlsoKnownAs,
       websAlsoKnownAs: websVerification.websAlsoKnownAs || [],
       daVerified: websVerification.daVerified,
@@ -431,7 +425,6 @@ router.get('/verify-linkage/from-iota/:did', async (req: Request, res: Response,
  */
 router.post('/webhook/sally', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Extract Sally headers
     const sallyResource = req.headers['sally-resource'] as string | undefined;
     const sallyTimestamp = req.headers['sally-timestamp'];
 
@@ -467,7 +460,6 @@ router.post('/webhook/sally', async (req: Request, res: Response, next: NextFunc
 
     console.log(`  Credential SAID: ${credentialSaid}`);
 
-    // Process verification result
     const verified = action === 'iss';
     const revoked = action === 'rev';
 

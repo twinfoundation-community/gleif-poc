@@ -4,14 +4,13 @@ import cors from 'cors';
 import apiRouter from './routes/api';
 import kelRouter from './routes/kel';
 import { getEnvConfig, loadTrustAnchors } from './services/config';
-import { initializeNftConnector } from './services/nft-connector-setup';
+import { initializeIotaConnector } from './services/iota-connector-setup';
 import { initializeIdentityConnector } from './services/identity-connector-setup';
 import { isoTimestamp } from '@gleif/verifier-core';
 
 const app = express();
 const env = getEnvConfig();
 
-// Middleware
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3001', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174'],
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -19,7 +18,6 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '100kb' }));
 
-// Health check endpoint
 app.get('/health', (_req: Request, res: Response) => {
   res.json({
     status: 'ok',
@@ -28,14 +26,12 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
-// API routes
 app.use('/api', apiRouter);
 
 // KEL routes -- mounted at root so did:webs resolver can fetch
 // /keri/{AID}/did.json and /keri/{AID}/keri.cesr directly
 app.use('/', kelRouter);
 
-// Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err.message);
   console.error(err.stack);
@@ -46,7 +42,6 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
-// 404 handler
 app.use((_req: Request, res: Response) => {
   res.status(404).json({
     error: 'Not found',
@@ -54,11 +49,9 @@ app.use((_req: Request, res: Response) => {
   });
 });
 
-// Startup
 async function start() {
   console.log('Starting vLEI Linkage Verifier Backend...');
 
-  // Validate configuration
   try {
     const config = loadTrustAnchors();
     console.log('Trust anchors loaded:');
@@ -78,13 +71,13 @@ async function start() {
   console.log(`  KERIA URL: ${env.keriaUrl}`);
   console.log(`  IOTA Node URL: ${env.iotaNodeUrl}`);
 
-  // Initialize NFT connector (sets up vault infrastructure)
+  // Initialize IOTA connector (vault + wallet for attestation minting and identity)
   const nftMnemonic = process.env.NFT_MNEMONIC;
   const nftIdentity = process.env.NFT_IDENTITY || 'attestation-service';
-  const nftEnabled = await initializeNftConnector(nftMnemonic, nftIdentity);
-  console.log(`  NFT Minting: ${nftEnabled ? 'enabled' : 'disabled (set NFT_MNEMONIC to enable)'}`);
+  const iotaEnabled = await initializeIotaConnector(nftMnemonic, nftIdentity);
+  console.log(`  Attestation Minting: ${iotaEnabled ? 'enabled' : 'disabled (set NFT_MNEMONIC to enable)'}`);
 
-  // Initialize IOTA identity connector (must be after NFT connector for vault access)
+  // Initialize IOTA identity connector (must be after IOTA connector for vault access)
   try {
     const identityEnabled = await initializeIdentityConnector(nftIdentity);
     console.log(`  IOTA Identity: ${identityEnabled ? 'enabled (real on-chain DIDs)' : 'not available'}`);

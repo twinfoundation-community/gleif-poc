@@ -112,9 +112,9 @@ export function NftAttestation({ verificationResult, onMintComplete, existingAtt
 
       <div className="attestation-info">
         <p className="info-text">
-          Creates an <strong>IRC27-compliant NFT</strong> on IOTA with a <strong>signed W3C
+          Creates a <strong>vLEI Linkage Attestation</strong> on IOTA with a <strong>signed W3C
           Verifiable Credential</strong> attesting the bidirectional linkage between did:webs (vLEI)
-          and did:iota. The LE signs the VC with their KERI key (Ed25519), making the NFT
+          and did:iota. The LE signs the VC with their KERI key (Ed25519), making the attestation
           independently verifiable.
         </p>
         <ul className="info-list">
@@ -124,7 +124,7 @@ export function NftAttestation({ verificationResult, onMintComplete, existingAtt
           <li>Trust chain (GLEIF &rarr; QVI &rarr; LE)</li>
         </ul>
         <p className="info-text info-purpose">
-          Third parties verify by: reading the NFT &rarr; extracting the JWT &rarr;
+          Third parties verify by: reading the attestation &rarr; extracting the JWT &rarr;
           resolving did:webs &rarr; checking the Ed25519 signature. No KERI infrastructure needed.
         </p>
       </div>
@@ -136,14 +136,6 @@ export function NftAttestation({ verificationResult, onMintComplete, existingAtt
             NFT Minted Successfully
           </div>
           <div className="nft-details">
-            <div className="detail-item">
-              <label>Standard</label>
-              <code>{existingAttestation.metadata?.standard || 'IRC27'} {existingAttestation.metadata?.version || 'v1.0'}</code>
-            </div>
-            <div className="detail-item">
-              <label>Name</label>
-              <span>{existingAttestation.metadata?.name || 'vLEI Linkage Attestation'}</span>
-            </div>
             {existingAttestation.metadata?.didWebs && (
               <div className="detail-item">
                 <label>did:webs</label>
@@ -158,7 +150,7 @@ export function NftAttestation({ verificationResult, onMintComplete, existingAtt
             )}
             <div className="detail-item">
               <label>LEI</label>
-              <code>{existingAttestation.metadata?.leLei || verificationResult.leLei}</code>
+              <code>{existingAttestation.metadata?.lei || verificationResult.leLei}</code>
             </div>
             <div className="detail-item">
               <label>NFT ID</label>

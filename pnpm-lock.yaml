@@ -38,12 +38,6 @@ importers:
       '@twin.org/nameof':
         specifier: next
         version: 0.0.3-next.16
-      '@twin.org/nft-connector-iota':
-        specifier: next
-        version: 0.0.3-next.1(typescript@5.9.3)
-      '@twin.org/nft-models':
-        specifier: next
-        version: 0.0.3-next.1
       '@twin.org/vault-connector-entity-storage':
         specifier: next
         version: 0.0.3-next.2
@@ -857,14 +851,6 @@ packages:
 
   '@twin.org/nameof@0.0.3-next.16':
     resolution: {integrity: sha512-odsfmWcUzxRot/biWUgzAaTbSw6vIvyg5sZTAxwhYW/33yRwgTk0WtdyzGbfMSGWmvoFCJWffyylR4XVSW4H9g==}
-    engines: {node: '>=20.0.0'}
-
-  '@twin.org/nft-connector-iota@0.0.3-next.1':
-    resolution: {integrity: sha512-VPDVlroNXLAiEPUuq8ucC/wVuDq/SIp8DcTzN8PfdYpd724SFZiX+o1In8q3DVFtoRfWZ30XCoYnVD05keTNew==}
-    engines: {node: '>=20.0.0'}
-
-  '@twin.org/nft-models@0.0.3-next.1':
-    resolution: {integrity: sha512-5mE6izo8shj0+vSgnYiYMaDUAneaTvrSYMajCliHmsc8nHbcmrLj8FE55UUDGG9ajLBDmB53HZWjqQB/XMRypA==}
     engines: {node: '>=20.0.0'}
 
   '@twin.org/standards-w3c-did@0.0.3-next.33':
@@ -3057,29 +3043,6 @@ snapshots:
       typescript: 5.9.3
 
   '@twin.org/nameof@0.0.3-next.16': {}
-
-  '@twin.org/nft-connector-iota@0.0.3-next.1(typescript@5.9.3)':
-    dependencies:
-      '@iota/bcs': 1.3.0
-      '@iota/iota-sdk': 1.7.1(typescript@5.9.3)
-      '@twin.org/core': 0.0.3-next.16
-      '@twin.org/crypto': 0.0.3-next.16
-      '@twin.org/dlt-iota': 0.0.3-next.1(typescript@5.9.3)
-      '@twin.org/logging-models': 0.0.3-next.1
-      '@twin.org/nameof': 0.0.3-next.16
-      '@twin.org/nft-models': 0.0.3-next.1
-      '@twin.org/vault-models': 0.0.3-next.2
-      '@twin.org/wallet-models': 0.0.3-next.1
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
-      - typescript
-
-  '@twin.org/nft-models@0.0.3-next.1':
-    dependencies:
-      '@twin.org/core': 0.0.3-next.16
-      '@twin.org/nameof': 0.0.3-next.16
-      '@twin.org/web': 0.0.3-next.16
 
   '@twin.org/standards-w3c-did@0.0.3-next.33(web-streams-polyfill@3.3.3)':
     dependencies:

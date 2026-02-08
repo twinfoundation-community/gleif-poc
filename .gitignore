@@ -5,6 +5,10 @@ node_modules/
 dist/
 *.tsbuildinfo
 
+# Move build artifacts
+contracts/*/build/
+contracts/*/Move.lock
+
 # Local environment overrides (base .env files are kept for PoC)
 .env.local
 .env.*.local

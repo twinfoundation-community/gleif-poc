@@ -23,7 +23,7 @@ The idea is simple: take a Legal Entity's vLEI credential, verify it via the ful
 - **Sally-based verification** -- credential presentation to Sally, which walks the chain and returns results via webhook
 - **Bidirectional DID linking** -- `did:webs` document includes `alsoKnownAs: [did:iota:...]` and vice versa
 - **Designated Aliases credential** -- self-issued ACDC linking the LE's KERI identifier to their IOTA DID; cryptographically verified via dws resolver (CESR stream verification)
-- **LE-signed NFT attestation** -- IRC27-compliant NFT minted on IOTA testnet, containing a W3C VC JWT signed by the LE's KERI key -- independently verifiable via WebCrypto without KERI infrastructure
+- **LE-signed on-chain attestation** -- custom Move object (`VleiAttestation`) minted on IOTA testnet, containing a W3C VC JWT signed by the LE's KERI key -- independently verifiable via WebCrypto without KERI infrastructure
 - **KEL publishing** -- backend serves `did.json` and `keri.cesr` for `did:webs` resolution
 
 ## Architecture
@@ -40,7 +40,7 @@ The idea is simple: take a Legal Entity's vLEI credential, verify it via the ful
 │  - signify-ts client (KERIA edge signing)               │
 │  - Sally credential presentation (IPEX grant)           │
 │  - KEL publisher (did:webs resolution)                  │
-│  - IOTA DID + NFT operations (TWIN.org connectors)      │
+│  - IOTA DID + attestation minting (@iota/iota-sdk)       │
 └────┬────────────┬────────────┬──────────────────────────┘
      │            │            │
 ┌────▼────┐ ┌────▼────┐ ┌─────▼─────┐
@@ -71,7 +71,7 @@ local-stack/
 ### Shared Libraries
 
 - **`@gleif/verifier-core`** -- Types, VC signing/verification (Ed25519 via WebCrypto), DID utilities, `did:webs` resolution, verification state management. Works in browser and Node.js.
-- **`@gleif/verifier-node`** -- Node.js extensions. KEL publishing, DID linking verifier, IOTA DID operations via TWIN.org connectors.
+- **`@gleif/verifier-node`** -- Node.js extensions. KEL publishing, DID linking verifier, IOTA DID operations.
 
 ## API Endpoints
 
@@ -88,7 +88,7 @@ local-stack/
 | `/api/iota/add-also-known-as` | POST | Set alsoKnownAs on IOTA DID |
 | `/api/iota/add-service` | POST | Add service endpoint to IOTA DID |
 | `/api/iota/resolve/:did` | GET | Resolve an IOTA DID document |
-| `/api/nft/mint` | POST | Mint IRC27 attestation NFT |
+| `/api/nft/mint` | POST | Mint vLEI linkage attestation |
 | `/keri/aids` | GET | List available AIDs from trust anchors |
 | `/keri/:aid/did.json` | GET | did:webs DID document |
 | `/keri/:aid/keri.cesr` | GET | KERI event log (CESR) |

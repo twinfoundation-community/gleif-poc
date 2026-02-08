@@ -1,10 +1,6 @@
 /**
- * IOTA Identity Service
- *
  * IOTA DID creation and resolution for bidirectional linkage.
- * Uses @twin.org/identity-connector-iota for on-chain DID operations.
- *
- * Must be initialized after the NFT connector (vault + wallet dependency).
+ * Must be initialized after the IOTA connector (vault + wallet dependency).
  */
 
 import {
@@ -36,14 +32,11 @@ export interface IotaDidDocument {
 }
 
 /**
- * The identity/controller name (must match NFT connector identity)
+ * The identity/controller name (must match IOTA connector identity)
  */
 const CONTROLLER_IDENTITY = process.env.NFT_IDENTITY || 'attestation-service';
 
-/**
- * In-memory cache for created/resolved DID documents
- * Maps DID -> document
- */
+/** In-memory cache for resolved DID documents. */
 const didCache = new Map<string, IotaDidDocument>();
 
 /**
@@ -63,14 +56,12 @@ export async function createIotaDid(controller?: string): Promise<{
   console.log(`[iota-identity] Creating DID on IOTA network for controller: ${actualController}`);
 
   try {
-    // Create and publish DID document to IOTA network
     const didDocument = await connector.createDocument(actualController);
 
     const did = didDocument.id;
     console.log(`[iota-identity] Created DID on network: ${did}`);
     console.log(`[iota-identity] Explorer: ${getDidExplorerUrl(did)}`);
 
-    // Cache for quick lookups
     const doc = didDocument as unknown as IotaDidDocument;
     didCache.set(did, doc);
 
@@ -88,13 +79,11 @@ export async function createIotaDid(controller?: string): Promise<{
 export async function resolveIotaDid(did: string): Promise<IotaDidDocument> {
   console.log(`[iota-identity] Resolving DID: ${did}`);
 
-  // Check cache first
   const cached = didCache.get(did);
   if (cached) {
     return cached;
   }
 
-  // Resolve from network using the resolver connector
   const resolver = getIdentityResolver();
   if (!resolver) {
     throw new Error('Identity resolver not initialized. Ensure IOTA connector is configured.');
@@ -103,7 +92,6 @@ export async function resolveIotaDid(did: string): Promise<IotaDidDocument> {
   try {
     const document = await resolver.resolveDocument(did);
 
-    // Cache the result
     const doc = document as unknown as IotaDidDocument;
     didCache.set(did, doc);
 
@@ -161,8 +149,6 @@ export async function addAlsoKnownAsToIotaDid(
   documentId: string,
   aliases: string[]
 ): Promise<void> {
-  // Use the direct SDK implementation for proper alsoKnownAs support
-  // See: src/services/iota-also-known-as.ts for implementation details
   await setAlsoKnownAs(documentId, aliases, controller || undefined);
 
   // Invalidate cache - document has changed

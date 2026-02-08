@@ -1,37 +1,21 @@
 /**
- * IOTA Identity Connector Setup
- *
- * Initializes the TWIN.org Identity connector infrastructure for creating
- * and resolving IOTA DIDs on the network.
+ * Initializes TWIN.org Identity connector for creating and resolving IOTA DIDs.
  */
 import { IotaIdentityConnector } from '@twin.org/identity-connector-iota';
 import { IotaIdentityResolverConnector } from '@twin.org/identity-connector-iota';
 import { IdentityConnectorFactory, IdentityResolverConnectorFactory } from '@twin.org/identity-models';
 import { getEnvConfig } from './config';
 
-/**
- * Mnemonic key name in vault (must match NFT connector)
- */
+/** Must match the key name used in iota-connector-setup. */
 const MNEMONIC_KEY_NAME = 'mnemonic';
 
-/**
- * Identity connector instance (singleton)
- */
 let identityConnector: IotaIdentityConnector | null = null;
-
-/**
- * Identity resolver instance (singleton)
- */
 let identityResolver: IotaIdentityResolverConnector | null = null;
-
-/**
- * Whether the connector has been initialized
- */
 let isInitialized = false;
 
 /**
  * Initialize identity connector infrastructure.
- * Must be called after initializeNftConnector() -- needs the vault and wallet.
+ * Must be called after initializeIotaConnector() -- needs the vault and wallet.
  */
 export async function initializeIdentityConnector(identity: string): Promise<boolean> {
   if (isInitialized) {
@@ -44,7 +28,6 @@ export async function initializeIdentityConnector(identity: string): Promise<boo
 
     const env = getEnvConfig();
 
-    // Create identity connector (uses vault and wallet from NFT setup)
     identityConnector = new IotaIdentityConnector({
       config: {
         clientOptions: { url: env.iotaNodeUrl },
@@ -54,10 +37,9 @@ export async function initializeIdentityConnector(identity: string): Promise<boo
       },
     });
 
-    // Register in factory for dependency injection
     IdentityConnectorFactory.register('identity', () => identityConnector!);
 
-    // Create resolver connector (read-only, doesn't need wallet)
+    // Resolver is read-only -- doesn't need wallet
     identityResolver = new IotaIdentityResolverConnector({
       config: {
         clientOptions: { url: env.iotaNodeUrl },
@@ -65,7 +47,6 @@ export async function initializeIdentityConnector(identity: string): Promise<boo
       },
     });
 
-    // Register resolver in factory
     IdentityResolverConnectorFactory.register('identity-resolver', () => identityResolver!);
 
     console.log('[Identity] Identity connector initialized');

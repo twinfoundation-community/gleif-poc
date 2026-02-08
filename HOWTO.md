@@ -92,7 +92,7 @@ curl http://localhost:3000/api/config | jq .
 # Verify LE credential via Sally
 curl -X POST http://localhost:3000/api/verify | jq .
 
-# Mint attestation NFT (requires verification first)
+# Mint attestation (requires verification first)
 curl -X POST http://localhost:3000/api/nft/mint \
   -H "Content-Type: application/json" -d '{}' | jq .
 
@@ -120,9 +120,9 @@ cd local-stack
 ./stop.sh
 ```
 
-## NFT Minting Setup
+## Attestation Minting Setup
 
-NFT minting won't work without `NFT_MNEMONIC` configured -- the endpoints just return an error if it's missing.
+Attestation minting won't work without `NFT_MNEMONIC` configured -- the endpoints just return an error if it's missing.
 
 ### 1. Generate a Mnemonic
 
@@ -144,14 +144,14 @@ NFT_MNEMONIC=<your-generated-mnemonic>
 
 ```bash
 cd local-stack
-podman rm -f vlei-backend
-podman-compose -f docker-compose.backend.yaml up -d
+docker rm -f vlei-backend
+docker compose -f docker-compose.backend.yaml up -d
 ```
 
 ### 4. Get Wallet Address
 
 ```bash
-podman logs vlei-backend 2>&1 | grep "Wallet address"
+docker logs vlei-backend 2>&1 | grep "Wallet address"
 ```
 
 ### 5. Fund via Faucet
@@ -166,7 +166,7 @@ curl --location --request POST 'https://faucet.testnet.iota.cafe/v1/gas' \
   }'
 ```
 
-Once funded, NFT minting in the UI creates real on-chain attestations -- viewable at https://explorer.iota.org/?network=testnet
+Once funded, attestation minting in the UI creates real on-chain `VleiAttestation` objects -- viewable at https://explorer.iota.org/?network=testnet
 
 ## Reset
 
@@ -205,7 +205,7 @@ echo '{}' > scripts/.trust-anchors.json
 # Then re-run setup-trust-anchors
 ```
 
-**NFT minting not working:** Set `NFT_MNEMONIC` in `local-stack/.env` and restart the backend. Look for "NFT Minting: enabled (real)" in the logs. Make sure the wallet is funded via the faucet.
+**Attestation minting not working:** Set `NFT_MNEMONIC` in `local-stack/.env` and restart the backend. Look for "Attestation Minting: enabled" in the logs. Make sure the wallet is funded via the faucet.
 
 **Direction 2 shows "No did:webs found":** The reverse link didn't get added. Re-run setup-trust-anchors with the backend running, then restart the stack.
 

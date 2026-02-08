@@ -1,17 +1,15 @@
-/** IRC27 attestation metadata */
-interface IRC27AttestationMetadata {
-  standard: 'IRC27';
-  version: 'v1.0';
-  name: string;
-  collectionName: string;
-  issuerName: string;
-  description: string;
+/** vLEI attestation metadata (on-chain Move object fields) */
+export interface AttestationMetadata {
   didWebs: string;
   didIota: string;
+  lei: string;
   leAid: string;
-  leLei: string;
   credentialSaid: string;
-  verificationTimestamp: string;
+  gleifAid?: string;
+  qviAid?: string;
+  qviCredentialSaid?: string;
+  verifiedAt: string;
+  verifiedBy: string;
   /** Signed W3C VC JWT (EdDSA, Ed25519) */
   signedVc?: string;
   /** did:webs verification method used for signing */
@@ -22,5 +20,5 @@ interface IRC27AttestationMetadata {
 export interface NftAttestation {
   nftId: string;
   explorerUrl: string;
-  metadata: IRC27AttestationMetadata;
+  metadata: AttestationMetadata;
 }

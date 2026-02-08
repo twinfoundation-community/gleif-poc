@@ -5,9 +5,7 @@ import type { PublicTrustChainConfig } from '@gleif/verifier-core';
 
 let cachedConfig: TrustAnchorConfig | null = null;
 
-/**
- * Load and parse the trust anchors configuration file
- */
+/** Loads trust anchors from disk, caches the result. */
 export function loadTrustAnchors(): TrustAnchorConfig {
   if (cachedConfig) {
     return cachedConfig;
@@ -76,16 +74,11 @@ export function getPublicConfig(): PublicTrustChainConfig {
   };
 }
 
-/**
- * Get the full config (internal use only)
- */
+/** Full config including secrets -- internal use only. */
 export function getFullConfig(): TrustAnchorConfig {
   return loadTrustAnchors();
 }
 
-/**
- * Get environment configuration
- */
 export function getEnvConfig() {
   return {
     port: parseInt(process.env.PORT || '3000', 10),
@@ -95,7 +88,7 @@ export function getEnvConfig() {
     keriaBootUrl: process.env.KERIA_BOOT_URL || 'http://localhost:3903',
     // IOTA package IDs (deployed contracts on testnet)
     identityPackageId: process.env.IDENTITY_PACKAGE_ID || '0x222741bbdff74b42df48a7b4733185e9b24becb8ccfbafe8eac864ab4e4cc555',
-    nftPackageId: process.env.NFT_PACKAGE_ID || '0x5284a202f337621bb5fa4c216b45aaa6ef583acd712d5026829528e30c3199b9',
+    attestationPackageId: process.env.ATTESTATION_PACKAGE_ID || '',
     // vLEI schema SAIDs
     leCredentialSchemaSaid: process.env.LE_SCHEMA_SAID || 'ENPXp1vQzRF6JwIuS-mp2U8Uf1MoADoP_GqQ62VsDZWY',
   };
