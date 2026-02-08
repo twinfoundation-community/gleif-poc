@@ -22,7 +22,7 @@ The idea is simple: take a Legal Entity's vLEI credential, verify it via the ful
 - **Full vLEI trust chain** -- GLEIF -> QVI -> LE credential issuance via IPEX protocol
 - **Sally-based verification** -- credential presentation to Sally, which walks the chain and returns results via webhook
 - **Bidirectional DID linking** -- `did:webs` document includes `alsoKnownAs: [did:iota:...]` and vice versa
-- **Designated Aliases credential** -- self-issued ACDC linking the LE's KERI identifier to their IOTA DID; cryptographically verified via dkr resolver (CESR stream verification)
+- **Designated Aliases credential** -- self-issued ACDC linking the LE's KERI identifier to their IOTA DID; cryptographically verified via dws resolver (CESR stream verification)
 - **LE-signed NFT attestation** -- IRC27-compliant NFT minted on IOTA testnet, containing a W3C VC JWT signed by the LE's KERI key -- independently verifiable via WebCrypto without KERI infrastructure
 - **KEL publishing** -- backend serves `did.json` and `keri.cesr` for `did:webs` resolution
 

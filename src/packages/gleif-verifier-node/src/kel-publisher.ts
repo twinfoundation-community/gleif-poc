@@ -42,8 +42,6 @@ interface DidWebsVerificationMethod {
  */
 interface DidWebsDocument extends DIDDocument {
   verificationMethod: DidWebsVerificationMethod[];
-  authentication: string[];
-  assertionMethod: string[];
 }
 
 /**
@@ -130,18 +128,20 @@ export class KelPublisher {
     });
 
     const doc: DidWebsDocument = {
-      '@context': [
-        'https://www.w3.org/ns/did/v1',
-        'https://w3id.org/security/suites/jws-2020/v1',
-      ],
       id: didId,
       verificationMethod: verificationMethods,
-      authentication: verificationMethods.map((vm) => vm.id),
-      assertionMethod: verificationMethods.map((vm) => vm.id),
+      service: [],
     };
 
     if (alsoKnownAs && alsoKnownAs.length > 0) {
-      doc.alsoKnownAs = alsoKnownAs;
+      const didWebId = path
+        ? `did:web:${domain}:${path}:${aid}`
+        : `did:web:${domain}:${aid}`;
+      doc.alsoKnownAs = [
+        ...alsoKnownAs,
+        `did:keri:${aid}`,
+        didWebId,
+      ];
     }
 
     return doc;

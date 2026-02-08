@@ -138,7 +138,7 @@ The PoC verifies linkage in both directions:
 
 **Direction 1: `did:webs` to `did:iota`**
 ```
-1. Resolve did:webs via dkr resolver
+1. Resolve did:webs via dws resolver
    - Fetches DID document + KERI CESR event stream
    - Verifies Designated Aliases credential in the CESR stream
 2. Extract did:iota from the document's alsoKnownAs field
@@ -192,7 +192,7 @@ Revocation is recorded in the TEL (Transaction Event Log), anchored to the issue
 Optional public record on IOTA. The NFT contains IRC27 metadata with a W3C VC JWT signed by the LE's KERI key. Verifiable using the LE's public key (via `did:webs`) with standard Ed25519/WebCrypto -- no KERI infrastructure needed.
 
 **Q: How does `did:webs` resolution work?**
-The identifier encodes a domain and AID (e.g., `did:webs:example.com:keri:EBfd...`). Resolution fetches (1) a DID document at `/keri/{AID}/did.json` and (2) a CESR event stream at `/keri/{AID}/keri.cesr`. The resolver (dkr) verifies the CESR stream -- the DID document is only trustworthy if the CESR proof checks out.
+The identifier encodes a domain and AID (e.g., `did:webs:example.com:keri:EBfd...`). Resolution fetches (1) a DID document at `/keri/{AID}/did.json` and (2) a CESR event stream at `/keri/{AID}/keri.cesr`. The resolver (dws) verifies the CESR stream -- the DID document is only trustworthy if the CESR proof checks out.
 
 **Q: What makes bidirectional linking secure?**
 Each direction requires the respective private key:

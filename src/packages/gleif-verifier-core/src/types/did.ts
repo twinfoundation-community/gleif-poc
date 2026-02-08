@@ -25,7 +25,7 @@ interface DIDService {
 
 /** DID document (W3C DID Core spec) */
 export interface DIDDocument {
-  '@context': string | string[];
+  '@context'?: string | string[];
   id: string;
   verificationMethod?: VerificationMethod[];
   authentication?: (string | VerificationMethod)[];

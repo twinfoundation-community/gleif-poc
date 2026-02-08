@@ -131,13 +131,11 @@ $COMPOSE_CMD -f docker-compose-keria_signify_qvi.yaml ps
 echo ""
 
 # start did-webs-resolver
-# no published gleif/did-webs-resolver image exists -- build from source:
-#   git clone https://github.com/hyperledger-labs/did-webs-resolver
-#   cd did-webs-resolver && docker build -f images/did-webs-resolver-service.dockerfile -t did-webs-resolver:latest .
-# using 2byrds/webs:latest which includes dkr
+# canonical upstream: https://github.com/GLEIF-IT/did-webs-resolver
+# uses GLEIF-IT's official image: gleif/did-webs-resolver-service
 echo "starting did-webs-resolver..."
 DID_WEBS_RESOLVER_CONTAINER="did-webs-resolver"
-RESOLVER_KEYSTORE_NAME="dkr"  # Must match dkr's default keystore name
+RESOLVER_KEYSTORE_NAME="dws"
 
 # remove existing container if present
 $DOCKER_CMD rm -f $DID_WEBS_RESOLVER_CONTAINER 2>/dev/null || true
@@ -146,21 +144,21 @@ $DOCKER_CMD rm -f $DID_WEBS_RESOLVER_CONTAINER 2>/dev/null || true
 $DOCKER_CMD volume create resolver-data 2>/dev/null || true
 
 # init resolver keystore if it doesn't exist
-# dkr needs an initialized KERI keystore to work
+# dws needs an initialized KERI keystore to work
 # mount at /usr/local/var/keri -- that's where kli stores keystores by default
 echo "  checking resolver keystore..."
 KEYSTORE_CHECK=$($DOCKER_CMD run --rm \
     -v resolver-data:/usr/local/var/keri \
-    --entrypoint /keripy/venv/bin/kli \
-    2byrds/webs:latest \
+    --entrypoint /dws/.venv/bin/kli \
+    gleif/did-webs-resolver-service:0.3.3 \
     status --name $RESOLVER_KEYSTORE_NAME 2>&1 || true)
 
 if [[ "$KEYSTORE_CHECK" =~ "Keystore must already exist" ]]; then
     echo "  initializing resolver keystore..."
     $DOCKER_CMD run --rm \
         -v resolver-data:/usr/local/var/keri \
-        --entrypoint /keripy/venv/bin/kli \
-        2byrds/webs:latest \
+        --entrypoint /dws/.venv/bin/kli \
+        gleif/did-webs-resolver-service:0.3.3 \
         init --name $RESOLVER_KEYSTORE_NAME --nopasscode
     echo "  keystore initialized."
 else
@@ -168,17 +166,14 @@ else
 fi
 
 # start did-webs-resolver container
-# 2byrds/webs has kli as entrypoint; override it to use dkr
-# the -p/--http flag has a bug (string vs int), so we use default port 7677
-# don't pass --name to dkr -- it defaults to 'dkr' which matches the keystore
 $DOCKER_CMD run -d \
     --name $DID_WEBS_RESOLVER_CONTAINER \
     --network vlei \
     -p 7677:7677 \
     -v resolver-data:/usr/local/var/keri \
-    --entrypoint /keripy/venv/bin/dkr \
-    2byrds/webs:latest \
-    did webs resolver-service
+    --entrypoint /dws/.venv/bin/dws \
+    gleif/did-webs-resolver-service:0.3.3 \
+    did webs resolver-service --name dws --http 7677 --loglevel INFO
 
 echo "  - did-webs-resolver: localhost:7677"
 echo ""

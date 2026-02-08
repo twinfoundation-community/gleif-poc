@@ -8,7 +8,7 @@ Everything you need to get this running, step by step. For architecture and API 
 - Node.js 20+ with pnpm
 - `jq` (used by startup scripts)
 
-First run pulls several container images (`gleif/keri`, `gleif/keria`, `gleif/sally`, `gleif/vlei`, `2byrds/webs`, `node:20-alpine`) -- expect a few minutes on the initial pull depending on your connection.
+First run pulls several container images (`gleif/keri`, `gleif/keria`, `gleif/sally`, `gleif/vlei`, `gleif/did-webs-resolver-service`, `node:20-alpine`) -- expect a few minutes on the initial pull depending on your connection.
 
 ## 1. Start Infrastructure
 
