@@ -4,7 +4,7 @@ How this PoC works and how trust is established.
 
 ## The Problem
 
-No standardized way exists to cryptographically prove "this digital entity is this real-world legal entity." Domain names, certificates, and manual document checks can all be forged, revoked without notice, or go stale.
+There's no standardized way to cryptographically prove "this digital entity is this real-world legal entity." Domain names, certificates, and manual document checks can all be forged, revoked without notice, or go stale.
 
 GLEIF's vLEI system creates a machine-verifiable chain of trust anchored in the LEI system -- the same system regulators and banks already use to identify companies. This PoC extends that trust into IOTA.
 
@@ -188,8 +188,8 @@ Signify client only. KERIA stores encrypted key material it can't decrypt. All s
 **Q: What happens if a credential is revoked?**
 Revocation is recorded in the TEL (Transaction Event Log), anchored to the issuer's KEL. Sally checks revocation status at every level -- a revoked credential anywhere in the chain fails the entire verification.
 
-**Q: What's the NFT attestation for?**
-Optional public record on IOTA. The NFT contains IRC27 metadata with a W3C VC JWT signed by the LE's KERI key. Verifiable using the LE's public key (via `did:webs`) with standard Ed25519/WebCrypto -- no KERI infrastructure needed.
+**Q: What's the on-chain attestation for?**
+Optional public record on IOTA. The attestation is a custom Move object (`VleiAttestation`) with typed fields (LEI, DIDs, trust chain) and a W3C VC JWT signed by the LE's KERI key. Verifiable using the LE's public key (via `did:webs`) with standard Ed25519/WebCrypto -- no KERI infrastructure needed.
 
 **Q: How does `did:webs` resolution work?**
 The identifier encodes a domain and AID (e.g., `did:webs:example.com:keri:EBfd...`). Resolution fetches (1) a DID document at `/keri/{AID}/did.json` and (2) a CESR event stream at `/keri/{AID}/keri.cesr`. The resolver (dws) verifies the CESR stream -- the DID document is only trustworthy if the CESR proof checks out.
@@ -200,3 +200,188 @@ Each direction requires the respective private key:
 - `did:webs` `alsoKnownAs` -- comes from the Designated Aliases ACDC, signed by the LE's KERI key, anchored to their KEL
 
 Compromise requires both key systems simultaneously.
+
+## Live Examples (from running PoC)
+
+All examples below are from the actual running instance. AIDs, SAIDs, and DIDs are real KERI/IOTA artifacts.
+
+### The Three Identities
+
+| Role | AID | LEI |
+|------|-----|-----|
+| GLEIF (root) | `EDpqE29yQOa4tFJgaanyVNGHowPAeGfbSNJFcq5vdmRn` | -- |
+| QVI (issuer) | `EGMpRb3F_7sFiS4P66JF4SF2R5ak71Jexh768rCqOtPs` | -- |
+| Legal Entity | `ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8` | `5493001KJTIIGC8Y1R12` |
+
+Each AID is a self-certifying KERI identifier derived from an Ed25519 public key. The `E` prefix is the CESR derivation code for a self-addressing identifier (Blake3-256 digest of inception event).
+
+### The Credential Chain
+
+**QVI Credential** (GLEIF issues to QVI):
+```
+SAID:   EAlKZCfyY3tjiJfnKeGKKyIN9TZZCmNNgylqLoUCwhsK
+Schema: EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao  (QVI vLEI schema)
+Issuer: EDpqE29yQOa4tFJgaanyVNGHowPAeGfbSNJFcq5vdmRn  (GLEIF)
+Issuee: EGMpRb3F_7sFiS4P66JF4SF2R5ak71Jexh768rCqOtPs  (QVI)
+```
+
+**LE Credential** (QVI issues to Legal Entity):
+```
+SAID:   ECXuBj5qZqJnczALvPOYaARSkP0j2JGQuJAyGp0PBJjp
+Schema: ENPXp1vQzRF6JwIuS-mp2U8Uf1MoADoP_GqQ62VsDZWY  (LE vLEI schema)
+Issuer: EGMpRb3F_7sFiS4P66JF4SF2R5ak71Jexh768rCqOtPs  (QVI)
+Issuee: ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8  (LE)
+```
+
+**Designated Aliases Credential** (LE self-issues):
+```
+SAID:   EGLIvP1924ZsA3hZnBDCV2qZkO3LQWiUjfi7YN2sgVEm
+Schema: EN6Oh5XSD5_q2Hgu-aqpdfbVepdpYpFlgz6zvJL5b_r5  (DA schema)
+Issuer: ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8  (LE -- self-issued)
+IDs:    ["did:iota:testnet:0x6b4dbe57b15ec05cd93a833f4b2c4a1a7bfdcf0f64c1c92d91f316974d0aed9a"]
+```
+
+Note the chain: each credential's issuer is the issuee of the credential above it. The DA credential is self-issued -- issuer and controller are the same AID.
+
+### What an ACDC Credential Looks Like
+
+The Designated Aliases credential as it appears in the KERI CESR stream:
+
+```json
+{
+  "v":  "ACDC10JSON0004bb_",
+  "d":  "EGLIvP1924ZsA3hZnBDCV2qZkO3LQWiUjfi7YN2sgVEm",
+  "i":  "ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8",
+  "ri": "ED-MBYmbroJvFCbIQ1PzaNlysRrevtudAokwSaWBiNgs",
+  "s":  "EN6Oh5XSD5_q2Hgu-aqpdfbVepdpYpFlgz6zvJL5b_r5",
+  "a": {
+    "d":  "EFvoTtftLOHUCJdTEH1hxYo0nzhzxcdK79O6IJ9w4Olo",
+    "dt": "2026-02-08T06:26:36.937000+00:00",
+    "ids": [
+      "did:iota:testnet:0x6b4dbe57b15ec05cd93a833f4b2c4a1a7bfdcf0f64c1c92d91f316974d0aed9a"
+    ]
+  },
+  "r": {
+    "d": "",
+    "aliasDesignation": {
+      "l": "The issuer of this ACDC designates the identifiers in the ids field as the only allowed namespaced aliases of the issuer's AID."
+    },
+    "usageDisclaimer": {
+      "l": "This attestation only asserts designated aliases of the controller of the AID, that the AID controlled namespaced alias has been designated by the controller. It does not assert that the controller of this AID has control over the infrastructure or anything else related to the namespace other than the included AID."
+    },
+    "issuanceDisclaimer": {
+      "l": "All information in a valid and non-revoked alias designation assertion is accurate as of the date specified."
+    },
+    "termsOfUse": {
+      "l": "Designated aliases of the AID must only be used in a manner consistent with the expressed intent of the AID controller."
+    }
+  }
+}
+```
+
+| Field | Meaning |
+|-------|---------|
+| `v` | Version string: ACDC version 1.0, JSON encoding, 0x4bb bytes |
+| `d` | SAID of this credential (content hash embedded in the content it hashes) |
+| `i` | Controller AID (the LE) |
+| `ri` | Registry identifier -- tracks issuance/revocation status via TEL |
+| `s` | Schema SAID (content-addressed, not a URL -- prevents schema-swap) |
+| `a` | Attributes block with its own SAID (`d`), timestamp (`dt`), and the linked DIDs (`ids`) |
+| `r` | Rules block -- legal terms baked into the credential itself |
+
+### What a `did:webs` Document Looks Like
+
+`did:webs:backend:keri:ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8` (Legal Entity):
+
+```json
+{
+  "id": "did:webs:localhost%3A3000:keri:ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8",
+  "verificationMethod": [{
+    "id": "#DDpeZ25NNVTzgBad00Vpe1qTK5mz_QYkOkdKo6kDbHgY",
+    "type": "JsonWebKey",
+    "controller": "did:webs:localhost%3A3000:keri:ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8",
+    "publicKeyJwk": {
+      "kid": "DDpeZ25NNVTzgBad00Vpe1qTK5mz_QYkOkdKo6kDbHgY",
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "x": "Ol5nbk01VPOAFp3TRWl7WpMrmbP9BiQ6R0qjqQNseBg"
+    }
+  }],
+  "service": [],
+  "alsoKnownAs": [
+    "did:iota:testnet:0x6b4dbe57b15ec05cd93a833f4b2c4a1a7bfdcf0f64c1c92d91f316974d0aed9a",
+    "did:keri:ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8",
+    "did:web:localhost%3A3000:keri:ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8"
+  ]
+}
+```
+
+The `verificationMethod` exposes the LE's Ed25519 public key in JWK format. The `kid` is the KERI qualified key identifier (`D` prefix = Ed25519). The `alsoKnownAs` includes identifiers from the Designated Aliases credential plus `did:keri` and `did:web` equivalents of the AID.
+
+### What a `did:iota` Document Looks Like
+
+[`did:iota:testnet:0x6b4dbe57b15ec05cd93a833f4b2c4a1a7bfdcf0f64c1c92d91f316974d0aed9a`](https://explorer.iota.org/object/0x6b4dbe57b15ec05cd93a833f4b2c4a1a7bfdcf0f64c1c92d91f316974d0aed9a?network=testnet) (same Legal Entity, on-chain):
+
+```json
+{
+  "id": "did:iota:testnet:0x6b4dbe57b15ec05cd93a833f4b2c4a1a7bfdcf0f64c1c92d91f316974d0aed9a",
+  "alsoKnownAs": [
+    "did:webs:backend:keri:ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8"
+  ],
+  "service": [{
+    "id": "...#revocation",
+    "type": "RevocationBitmap2022",
+    "serviceEndpoint": "data:application/octet-stream;base64,eJyzMmAAAwADKABr"
+  }]
+}
+```
+
+The bidirectional link: `did:webs` document says `alsoKnownAs: did:iota:...` and the `did:iota` document says `alsoKnownAs: did:webs:...`. Both updates require the respective private key (KERI key for the `did:webs` side, IOTA controller key for the `did:iota` side).
+
+### What the KERI Event Stream Looks Like
+
+The CESR stream at `/keri/{AID}/keri.cesr` contains the LE's full cryptographic proof:
+
+```
+Inception Event (s:0)  ── creates the AID, commits to next keys, designates witness
+  │
+Interaction Event (s:1) ── anchors credential registry creation
+  │
+Interaction Event (s:2) ── anchors DA credential issuance
+  │
+Registry Inception (vcp) ── creates the TEL registry for credential status
+  │
+Issuance Event (iss) ── records DA credential issuance in the registry
+  │
+ACDC Credential ── the Designated Aliases credential itself
+```
+
+Each event is signed by the LE's Ed25519 key and counter-signed by the witness (`BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha`). The `did:webs` resolver (dws) verifies this entire stream before trusting the DID document.
+
+### What an OOBI Looks Like
+
+```
+http://keria1:3902/oobi/ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8/agent/EPx8XiQXxxsBBWUux3lUaRjDNt6HgYgbjw0fjgAP0ybY
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        target AID (Legal Entity)                               agent AID (KERIA agent for this identity)
+```
+
+The OOBI says: "to discover data about `ELyw5WNs...`, ask the KERIA agent at `EPx8XiQX...` via `http://keria1:3902`." After resolving, all data is verified cryptographically -- the OOBI itself is untrusted.
+
+### On-Chain Attestation
+
+[IOTA Explorer](https://explorer.iota.org/object/0x5783fd6ce2abc6f28302f1ff89073d0bb6614ad06449d49a514c51a1cd0f5488?network=testnet)
+
+A custom Move attestation object (`VleiAttestation`, package `0xd4d6f6488091e275ff59bcbe1999af90737ce1b5b866085284ceb262c7bdf9de`) stores typed Move object fields with a W3C VC JWT signed by the LE's KERI Ed25519 key. Anyone can verify the JWT using the public key from the `did:webs` document -- no KERI infrastructure needed.
+
+### Sally Verifier
+
+```
+AID: ECLwKe5b33BaV20x7HZWYi_KUXgY91S41fRL2uCaf4WQ
+```
+
+Sally is pre-configured with:
+- GLEIF's OOBI resolved (knows the root of trust)
+- QVI credential pre-loaded (can verify the full chain)
+
+When the LE presents its credential via IPEX grant, Sally walks the chain: LE credential -> QVI credential -> GLEIF root AID, verifying every signature and checking revocation status at each level.
