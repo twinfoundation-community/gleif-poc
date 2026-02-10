@@ -4,11 +4,26 @@ Everything you need to get this running, step by step. For architecture and API 
 
 ## Prerequisites
 
-- Docker or Podman
+- Docker (with compose plugin)
 - Node.js 20+
+- npm 10+
 - `jq` (used by startup scripts)
 
 First run pulls several container images (`gleif/keri`, `gleif/keria`, `gleif/sally`, `gleif/vlei`, `gleif/did-webs-resolver-service`, `node:20-alpine`) -- expect a few minutes on the initial pull depending on your connection.
+
+## 0. Clone & Install
+
+The infrastructure compose files live in a git submodule. This must be initialized before anything else:
+
+```bash
+git submodule init && git submodule update
+```
+
+Then install the workspace dependencies (the frontend and backend share packages via npm workspaces):
+
+```bash
+npm install
+```
 
 ## 1. Start Infrastructure
 
@@ -30,6 +45,8 @@ cd scripts
 npm install
 npm run setup-trust-anchors
 ```
+
+> This is a standalone package (not part of the npm workspace), so it needs its own `npm install`.
 
 This sets up the complete trust chain and bidirectional DID linkage in one shot:
 
@@ -64,11 +81,10 @@ cd local-stack
 
 ```bash
 cd src/app/frontend
-npm install
 npm run dev
 ```
 
-Opens at http://localhost:5173. If that port's taken, Vite auto-increments -- check the terminal output for the actual URL.
+Opens at http://localhost:5173. If that port's taken, Vite auto-increments -- check the terminal output for the actual URL. The frontend talks to the backend at `http://localhost:3000`.
 
 ## 4. Verify Two-Way Linkage
 
@@ -122,39 +138,31 @@ cd local-stack
 
 ## Attestation Minting Setup
 
-Attestation minting won't work without `NFT_MNEMONIC` configured -- the endpoints just return an error if it's missing.
+A default `NFT_MNEMONIC` is already configured in `local-stack/.env`. If you'd rather use your own mnemonic, replace the value in `.env` first.
 
-### 1. Generate a Mnemonic
+### 1. (Optional) Generate Your Own Mnemonic
+
+Skip this if you're fine with the default mnemonic in `.env`.
 
 ```bash
 cd src/app/backend
-npm install
 node -e "const bip39 = require('@scure/bip39'); const { wordlist } = require('@scure/bip39/wordlists/english'); console.log(bip39.generateMnemonic(wordlist, 256));"
 ```
 
-### 2. Add to Environment
-
-Edit `local-stack/.env` and add:
-
-```
-NFT_MNEMONIC=<your-generated-mnemonic>
-```
-
-### 3. Restart Backend
+Then replace `NFT_MNEMONIC` in `local-stack/.env` with the output and restart the backend:
 
 ```bash
 cd local-stack
-docker rm -f vlei-backend
-docker compose -f docker-compose.backend.yaml up -d
+./stop.sh && ./start.sh --with-backend
 ```
 
-### 4. Get Wallet Address
+### 2. Get Wallet Address
 
 ```bash
 docker logs vlei-backend 2>&1 | grep "Wallet address"
 ```
 
-### 5. Fund via Faucet
+### 3. Fund via Faucet
 
 ```bash
 curl --location --request POST 'https://faucet.testnet.iota.cafe/v1/gas' \
@@ -198,7 +206,7 @@ Then start over from Step 1.
 
 **Trust anchors missing:** Just re-run `npm run setup-trust-anchors` in `scripts/`.
 
-**setup-trust-anchors fails with "EISDIR" error:** Docker/Podman sometimes creates `.trust-anchors.json` as a directory instead of a file. Fix it and re-run:
+**setup-trust-anchors fails with "EISDIR" error:** Docker sometimes creates `.trust-anchors.json` as a directory instead of a file. Fix it and re-run:
 ```bash
 rm -rf scripts/.trust-anchors.json
 echo '{}' > scripts/.trust-anchors.json
