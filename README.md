@@ -133,3 +133,5 @@ GLEIF's public testnet -- no registration required.
 - [GLEIF-IT/qvi-software](https://github.com/GLEIF-IT/qvi-software) - QVI workflow samples
 - [WebOfTrust/signify-ts](https://github.com/WebOfTrust/signify-ts) - TypeScript KERI client
 - [GLEIF-IT/vlei-trainings](https://github.com/GLEIF-IT/vlei-trainings) - vLEI training notebooks
+
+Credit: This POC builds on the insights provided by Albert in the [POCv1](https://github.com/twinfoundation-community/gleif-poc).
