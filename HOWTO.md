@@ -5,7 +5,7 @@ Everything you need to get this running, step by step. For architecture and API 
 ## Prerequisites
 
 - Docker or Podman
-- Node.js 20+ with pnpm
+- Node.js 20+
 - `jq` (used by startup scripts)
 
 First run pulls several container images (`gleif/keri`, `gleif/keria`, `gleif/sally`, `gleif/vlei`, `gleif/did-webs-resolver-service`, `node:20-alpine`) -- expect a few minutes on the initial pull depending on your connection.
@@ -27,8 +27,8 @@ Give it ~30s for all services to come up healthy.
 
 ```bash
 cd scripts
-pnpm install
-pnpm run setup-trust-anchors
+npm install
+npm run setup-trust-anchors
 ```
 
 This sets up the complete trust chain and bidirectional DID linkage in one shot:
@@ -64,8 +64,8 @@ cd local-stack
 
 ```bash
 cd src/app/frontend
-pnpm install
-pnpm run dev
+npm install
+npm run dev
 ```
 
 Opens at http://localhost:5173. If that port's taken, Vite auto-increments -- check the terminal output for the actual URL.
@@ -74,7 +74,7 @@ Opens at http://localhost:5173. If that port's taken, Vite auto-increments -- ch
 
 ### Option A: Via Frontend UI
 
-1. Open the URL shown by `pnpm run dev` (default: http://localhost:5173)
+1. Open the URL shown by `npm run dev` (default: http://localhost:5173)
 2. **Trust Chain Panel**: Shows configured GLEIF → QVI → LE chain
 3. **Verify LE Credential**: Click "Verify" - submits credential to Sally
 4. **Mint NFT**: After verification succeeds, click "Mint NFT Attestation"
@@ -128,7 +128,7 @@ Attestation minting won't work without `NFT_MNEMONIC` configured -- the endpoint
 
 ```bash
 cd src/app/backend
-pnpm install
+npm install
 node -e "const bip39 = require('@scure/bip39'); const { wordlist } = require('@scure/bip39/wordlists/english'); console.log(bip39.generateMnemonic(wordlist, 256));"
 ```
 
@@ -196,7 +196,7 @@ Then start over from Step 1.
 
 **Backend not receiving webhooks:** Check that the backend is on the `vlei` network. Restart with `./start.sh --with-backend`.
 
-**Trust anchors missing:** Just re-run `pnpm run setup-trust-anchors` in `scripts/`.
+**Trust anchors missing:** Just re-run `npm run setup-trust-anchors` in `scripts/`.
 
 **setup-trust-anchors fails with "EISDIR" error:** Docker/Podman sometimes creates `.trust-anchors.json` as a directory instead of a file. Fix it and re-run:
 ```bash

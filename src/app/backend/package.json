@@ -8,8 +8,8 @@
     "prepare": "ts-patch install -s"
   },
   "dependencies": {
-    "@gleif/verifier-core": "workspace:*",
-    "@gleif/verifier-node": "workspace:*",
+    "@gleif/verifier-core": "*",
+    "@gleif/verifier-node": "*",
     "@iota/iota-sdk": "^1.10.1",
     "@twin.org/core": "next",
     "@twin.org/dlt-iota": "next",

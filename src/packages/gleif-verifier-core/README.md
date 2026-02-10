@@ -5,7 +5,7 @@ Core utilities for GLEIF vLEI verification -- platform-agnostic, zero dependenci
 ## Installation
 
 ```bash
-pnpm add @gleif/verifier-core
+npm install @gleif/verifier-core
 ```
 
 ## Exports

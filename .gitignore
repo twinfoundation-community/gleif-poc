@@ -19,6 +19,7 @@ scripts/.trust-anchors.json
 # Logs
 *.log
 npm-debug.log*
+pnpm-lock.yaml
 pnpm-debug.log*
 
 # Editor/IDE

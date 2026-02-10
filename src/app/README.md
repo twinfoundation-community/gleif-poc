@@ -16,8 +16,8 @@ src/app/
 
 ```bash
 cd frontend
-pnpm install
-pnpm run dev
+npm install
+npm run dev
 ```
 
 ### Backend
@@ -26,8 +26,8 @@ pnpm run dev
 cd backend
 cp .env.example .env
 # Edit .env with your configuration
-pnpm install
-pnpm run dev
+npm install
+npm run dev
 ```
 
 ## Environment Variables

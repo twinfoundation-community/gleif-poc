@@ -7,7 +7,7 @@ Extends `@gleif/verifier-core` with IOTA Identity operations.
 ## Installation
 
 ```bash
-pnpm add @gleif/verifier-node
+npm install @gleif/verifier-node
 ```
 
 ### Peer Dependencies
