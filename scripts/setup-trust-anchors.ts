@@ -932,9 +932,7 @@ async function main() {
         linkedIotaDid = process.env.LE_IOTA_DID;
         log('CREDENTIAL', `Backend unavailable, using LE_IOTA_DID env: ${linkedIotaDid}`);
     } else {
-        linkedIotaDid = `did:iota:ebsi:0x${'0'.repeat(40)}`;
-        log('CREDENTIAL', 'Backend unavailable and LE_IOTA_DID not set, using placeholder');
-        log('CREDENTIAL', 'NOTE: Run with backend (./start.sh --with-backend) for real IOTA DIDs');
+        throw new Error('Cannot create Designated Aliases credential: no IOTA DID available. Run with backend (./start.sh --with-backend) or set LE_IOTA_DID env var.');
     }
 
     const linkedIds = [linkedIotaDid];
