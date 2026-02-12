@@ -2,6 +2,7 @@
   "name": "keria-validation-scripts",
   "private": true,
   "dependencies": {
+    "dotenv": "^17.2.4",
     "signify-ts": "0.3.0-rc1"
   },
   "devDependencies": {

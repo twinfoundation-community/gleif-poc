@@ -6,10 +6,12 @@
  *
  * Usage: npx ts-node setup-trust-anchors.ts
  *
- * Env vars (all have sane defaults):
- *   KERIA_ADMIN_URL, KERIA_BOOT_URL, WITNESS_INTERNAL_URL,
- *   WITNESS_AID, SALLY_INTERNAL_URL, SALLY_AID
+ * Config loaded from root .env via dotenv.
  */
+
+import dotenv from 'dotenv';
+import * as path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 import {
     ready,
@@ -22,36 +24,34 @@ import {
     CredentialSubject,
 } from 'signify-ts';
 import * as fs from 'fs';
-import * as path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-// env or defaults
-const KERIA_ADMIN_URL = process.env.KERIA_ADMIN_URL || 'http://localhost:3901';
-const KERIA_BOOT_URL = process.env.KERIA_BOOT_URL || 'http://localhost:3903';
-const WITNESS_INTERNAL_URL = process.env.WITNESS_INTERNAL_URL || 'http://gar-witnesses:5642';
-const WITNESS_AID = process.env.WITNESS_AID || 'BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha';
+const KERIA_ADMIN_URL = process.env.KERIA_URL!;
+const KERIA_BOOT_URL = process.env.KERIA_BOOT_URL!;
+const WITNESS_INTERNAL_URL = process.env.WITNESS_INTERNAL_URL!;
+const WITNESS_AID = process.env.WITNESS_AID!;
 const WITNESS_OOBI = `${WITNESS_INTERNAL_URL}/oobi/${WITNESS_AID}/controller`;
 
 // sally (direct mode)
-const SALLY_INTERNAL_URL = process.env.SALLY_INTERNAL_URL || 'http://direct-sally:9823';
-const SALLY_AID = process.env.SALLY_AID || 'ECLwKe5b33BaV20x7HZWYi_KUXgY91S41fRL2uCaf4WQ';
+const SALLY_INTERNAL_URL = process.env.SALLY_INTERNAL_URL!;
+const SALLY_AID = process.env.DIRECT_SALLY_PRE!;
 const SALLY_OOBI = `${SALLY_INTERNAL_URL}/oobi/${SALLY_AID}/controller`;
-const SALLY_KS_NAME = process.env.DIRECT_SALLY_KS_NAME || 'direct-sally';
-const SALLY_PASSCODE = process.env.DIRECT_SALLY_PASSCODE || '4TBjjhmKu9oeDp49J7Xdy';
+const SALLY_KS_NAME = process.env.DIRECT_SALLY_KS_NAME!;
+const SALLY_PASSCODE = process.env.DIRECT_SALLY_PASSCODE!;
 
 // backend for IOTA DID creation
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
+const BACKEND_URL = process.env.BACKEND_URL!;
 
 // vLEI server -- container hostname so KERIA can reach it
-const VLEI_SERVER_URL = process.env.VLEI_SERVER_URL || 'http://vlei-server:7723';
+const VLEI_SERVER_URL = process.env.VLEI_SERVER_URL!;
 
 // schema SAIDs from vLEI spec
-const QVI_SCHEMA_SAID = 'EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao';
-const LE_SCHEMA_SAID = 'ENPXp1vQzRF6JwIuS-mp2U8Uf1MoADoP_GqQ62VsDZWY';
-const DESIGNATED_ALIASES_SCHEMA_SAID = 'EN6Oh5XSD5_q2Hgu-aqpdfbVepdpYpFlgz6zvJL5b_r5';
+const QVI_SCHEMA_SAID = process.env.QVI_SCHEMA!;
+const LE_SCHEMA_SAID = process.env.LE_SCHEMA!;
+const DESIGNATED_ALIASES_SCHEMA_SAID = process.env.DESIGNATED_ALIASES_SCHEMA!;
 
 // schema OOBI URLs
 const QVI_SCHEMA_OOBI = `${VLEI_SERVER_URL}/oobi/${QVI_SCHEMA_SAID}`;

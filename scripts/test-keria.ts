@@ -4,14 +4,14 @@
  *
  * Usage: npx ts-node test-keria.ts
  *
- * Env vars (all have defaults):
- *   KERIA_ADMIN_URL, KERIA_BOOT_URL, WITNESS_HOST_URL,
- *   WITNESS_INTERNAL_URL, WITNESS_AID, SKIP_WITNESS,
- *   DID_WEBS_RESOLVER_URL
- *
- * Note: KERIA resolves OOBIs from inside its container, so it uses
+ * Config loaded from root .env via dotenv.
+ * KERIA resolves OOBIs from inside its container, so it uses
  * container hostnames (gar-witnesses), not localhost.
  */
+
+import dotenv from 'dotenv';
+import * as path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 import {
     ready,
@@ -21,18 +21,14 @@ import {
     Operation,
 } from 'signify-ts';
 
-// env or defaults
-const KERIA_ADMIN_URL = process.env.KERIA_ADMIN_URL || 'http://localhost:3901';
-const KERIA_BOOT_URL = process.env.KERIA_BOOT_URL || 'http://localhost:3903';
-// host-side URL -- what this script can actually reach
-const WITNESS_HOST_URL = process.env.WITNESS_HOST_URL || 'http://localhost:5642';
-// container-side URL -- what KERIA sees
-const WITNESS_INTERNAL_URL = process.env.WITNESS_INTERNAL_URL || 'http://gar-witnesses:5642';
-const WITNESS_AID = process.env.WITNESS_AID || 'BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha';
-// uses internal hostname since KERIA is the one resolving it
+const KERIA_ADMIN_URL = process.env.KERIA_URL!;
+const KERIA_BOOT_URL = process.env.KERIA_BOOT_URL!;
+const WITNESS_HOST_URL = process.env.WITNESS_HOST_URL!;
+const WITNESS_INTERNAL_URL = process.env.WITNESS_INTERNAL_URL!;
+const WITNESS_AID = process.env.WITNESS_AID!;
 const WITNESS_OOBI = `${WITNESS_INTERNAL_URL}/oobi/${WITNESS_AID}/controller`;
 const SKIP_WITNESS = process.env.SKIP_WITNESS === 'true';
-const DID_WEBS_RESOLVER_URL = process.env.DID_WEBS_RESOLVER_URL || 'http://localhost:7677';
+const DID_WEBS_RESOLVER_URL = process.env.DID_WEBS_RESOLVER_URL!;
 const TEST_AID_NAME = 'test-aid';
 
 function log(step: string, message: string) {

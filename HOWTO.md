@@ -140,7 +140,7 @@ cd local-stack
 
 ## Attestation Minting Setup
 
-A default `NFT_MNEMONIC` is already configured in `local-stack/.env`. If you'd rather use your own mnemonic, replace the value in `.env` first.
+A default `NFT_MNEMONIC` is already configured in the root `.env`. If you'd rather use your own mnemonic, replace the value there first.
 
 ### 1. (Optional) Generate Your Own Mnemonic
 
@@ -151,7 +151,7 @@ cd src/app/backend
 node -e "const bip39 = require('@scure/bip39'); const { wordlist } = require('@scure/bip39/wordlists/english'); console.log(bip39.generateMnemonic(wordlist, 256));"
 ```
 
-Then replace `NFT_MNEMONIC` in `local-stack/.env` with the output and restart the backend:
+Then replace `NFT_MNEMONIC` in the root `.env` with the output and restart the backend:
 
 ```bash
 cd local-stack
@@ -215,7 +215,7 @@ echo '{}' > scripts/.trust-anchors.json
 # Then re-run setup-trust-anchors
 ```
 
-**Attestation minting not working:** Set `NFT_MNEMONIC` in `local-stack/.env` and restart the backend. Look for "Attestation Minting: enabled" in the logs. Make sure the wallet is funded via the faucet.
+**Attestation minting not working:** Set `NFT_MNEMONIC` in the root `.env` and restart the backend. Look for "Attestation Minting: enabled" in the logs. Make sure the wallet is funded via the faucet.
 
 **Direction 2 shows "No did:webs found":** The reverse link didn't get added. Re-run setup-trust-anchors with the backend running, then restart the stack.
 
