@@ -80,9 +80,11 @@ cd local-stack
 ## 3. Start Frontend
 
 ```bash
-cd src/app/frontend
-npm run dev
+# from the project root
+npm run dev:frontend
 ```
+
+This builds the workspace packages (`@gleif/verifier-core`, `@gleif/verifier-node`) and starts the Vite dev server.
 
 Opens at http://localhost:5173. If that port's taken, Vite auto-increments -- check the terminal output for the actual URL. The frontend talks to the backend at `http://localhost:3000`.
 

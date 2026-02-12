@@ -43,11 +43,6 @@ else
     export WEBHOOK_HOST=http://hook:9923
 fi
 
-export INDIRECT_SALLY_KS_NAME=sally-indirect
-export INDIRECT_SALLY_ALIAS=sally-indirect
-export INDIRECT_SALLY_PASSCODE=VVmRdBTe5YCyLMmYRqTAi
-export INDIRECT_SALLY_SALT=0AD45YWdzWSwNREuAoitH_CC
-export INDIRECT_SALLY_PRE=EJeORQY7Qbo_iJyE9OrM-Py0m-qjMQCLSmz2ztJDtifZ
 export DIRECT_SALLY_KS_NAME=direct-sally
 export DIRECT_SALLY_ALIAS=direct-sally
 export DIRECT_SALLY_PASSCODE=4TBjjhmKu9oeDp49J7Xdy
@@ -68,7 +63,6 @@ fi
 echo "starting local vLEI stack..."
 echo "  - vLEI Server (schema): localhost:7723"
 echo "  - KERIA: localhost:3901 (API), :3902 (HTTP), :3903 (Boot)"
-echo "  - Sally (indirect): localhost:9723"
 echo "  - Sally (direct): localhost:9823"
 echo "  - Webhook: localhost:9923"
 echo "  - Witnesses: localhost:5642-5645"
@@ -83,11 +77,9 @@ $COMPOSE_CMD -f docker-compose-keria_signify_qvi.yaml -f "$NAMES_OVERRIDE" up -d
     gar-witnesses \
     qar-witnesses \
     person-witnesses \
-    sally-witnesses \
     keria1 \
     hook \
-    direct-sally \
-    sally
+    direct-sally
 
 echo ""
 echo "waiting for services to come up..."

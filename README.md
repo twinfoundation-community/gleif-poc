@@ -101,8 +101,7 @@ local-stack/
 | Schema Server | `http://localhost:7723` | `/health`, `/oobi/{SAID}` |
 | KERIA API | `http://localhost:3901` | signify-ts client endpoint |
 | KERIA Boot | `http://localhost:3903` | Agent provisioning |
-| Sally (direct) | `http://localhost:9823` | No witnesses needed |
-| Sally (indirect) | `http://localhost:9723` | With witness support |
+| Sally | `http://localhost:9823` | No witnesses needed |
 | Webhook | `http://localhost:9923` | Demo webhook receiver |
 | Witnesses | `http://localhost:5642-5645` | 4 local witnesses |
 
