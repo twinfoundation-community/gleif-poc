@@ -134,14 +134,12 @@ export class KelPublisher {
     };
 
     if (alsoKnownAs && alsoKnownAs.length > 0) {
+      const didKeriId = `did:keri:${aid}`;
       const didWebId = path
         ? `did:web:${domain}:${path}:${aid}`
         : `did:web:${domain}:${aid}`;
-      doc.alsoKnownAs = [
-        ...alsoKnownAs,
-        `did:keri:${aid}`,
-        didWebId,
-      ];
+      const extras = [didKeriId, didWebId].filter(id => !alsoKnownAs.includes(id));
+      doc.alsoKnownAs = [...alsoKnownAs, ...extras];
     }
 
     return doc;
