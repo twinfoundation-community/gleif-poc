@@ -196,10 +196,8 @@ The identifier encodes a domain and AID (e.g., `did:webs:example.com:keri:EBfd..
 
 **Q: What makes bidirectional linking secure?**
 Each direction requires the respective private key:
-- IOTA DID `alsoKnownAs` -- requires IOTA controller's key (on-chain transaction)
-- `did:webs` `alsoKnownAs` -- comes from the Designated Aliases ACDC, signed by the LE's KERI key, anchored to their KEL
-
-Compromise requires both key systems simultaneously.
+- `did:iota` `alsoKnownAs` -- IOTA controller's key (BIP44-derived Ed25519, on-chain transaction)
+- `did:webs` `alsoKnownAs` -- comes from the Designated Aliases ACDC, signed by the LE's KERI key, anchored to their KEL (KERI-managed Ed25519 via Signify)
 
 ## Live Examples (from running PoC)
 
