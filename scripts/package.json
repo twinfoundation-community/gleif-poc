@@ -11,7 +11,6 @@
     "typescript": "^5.7.2"
   },
   "scripts": {
-    "test-keria": "ts-node test-keria.ts",
     "setup-trust-anchors": "ts-node setup-trust-anchors.ts"
   }
 }

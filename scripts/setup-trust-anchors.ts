@@ -26,6 +26,7 @@ import {
 import * as fs from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import type { TrustAnchorConfig } from '../src/app/backend/src/types/index';
 
 const execAsync = promisify(exec);
 
@@ -68,57 +69,6 @@ const LE_AID_NAME = 'legal-entity';
 const GLEIF_REGISTRY_NAME = 'gleif-registry';
 const QVI_REGISTRY_NAME = 'qvi-registry';
 const LE_REGISTRY_NAME = 'le-registry';
-
-interface TrustAnchorConfig {
-    gleif: {
-        name: string;
-        aid: string;
-        passcode: string;
-        oobi: string;
-        registryId: string;
-    };
-    qvi: {
-        name: string;
-        aid: string;
-        passcode: string;
-        oobi: string;
-        registryId: string;
-    };
-    le: {
-        name: string;
-        aid: string;
-        passcode: string;
-        oobi: string;
-        lei: string;
-        registryId?: string;
-        iotaDid?: string;
-    };
-    qviCredential: {
-        said: string;
-        schema: string;
-        issuer: string;
-        issuee: string;
-    };
-    leCredential: {
-        said: string;
-        schema: string;
-        issuer: string;
-        issuee: string;
-    };
-    designatedAliasesCredential?: {
-        said: string;
-        schema: string;
-        issuer: string;
-        ids: string[];
-    };
-    sally: {
-        aid: string;
-        configured: boolean;
-        gleifOobiResolved: boolean;
-        qviCredentialPreloaded: boolean;
-    };
-    timestamp: string;
-}
 
 // detect docker vs podman -- same logic as local-stack/start.sh
 // container name is fixed via docker-compose.names.yaml override
@@ -910,27 +860,23 @@ async function main() {
     let linkedIotaDid: string;
     let iotaDidCreatedViaBackend = false;
 
-    // try: backend API -> env var -> placeholder
     const backendResult = await createIotaDidViaBackend();
-    if (backendResult) {
-        linkedIotaDid = backendResult.did;
-        iotaDidCreatedViaBackend = true;
-        log('CREDENTIAL', `Using IOTA DID from backend: ${linkedIotaDid}`);
+    if (!backendResult) {
+        throw new Error('Cannot create Designated Aliases credential: backend unreachable. Run with ./start.sh --with-backend first.');
+    }
 
-        // reverse link (did:iota -> did:webs) for Direction 2
-        // format must match config.ts: did:webs:backend:keri:{aid}
-        const didWebs = `did:webs:backend:keri:${leAid.prefix}`;
-        const reverseLinked = await addAlsoKnownAsViaBackend(linkedIotaDid, didWebs);
-        if (reverseLinked) {
-            log('CREDENTIAL', `Reverse link established: ${linkedIotaDid} -> ${didWebs}`);
-        } else {
-            log('CREDENTIAL', 'Warning: Could not establish reverse link for Direction 2');
-        }
-    } else if (process.env.LE_IOTA_DID) {
-        linkedIotaDid = process.env.LE_IOTA_DID;
-        log('CREDENTIAL', `Backend unavailable, using LE_IOTA_DID env: ${linkedIotaDid}`);
+    linkedIotaDid = backendResult.did;
+    iotaDidCreatedViaBackend = true;
+    log('CREDENTIAL', `Using IOTA DID from backend: ${linkedIotaDid}`);
+
+    // reverse link (did:iota -> did:webs) for Direction 2
+    // format must match config.ts: did:webs:backend:keri:{aid}
+    const didWebs = `did:webs:backend:keri:${leAid.prefix}`;
+    const reverseLinked = await addAlsoKnownAsViaBackend(linkedIotaDid, didWebs);
+    if (reverseLinked) {
+        log('CREDENTIAL', `Reverse link established: ${linkedIotaDid} -> ${didWebs}`);
     } else {
-        throw new Error('Cannot create Designated Aliases credential: no IOTA DID available. Run with backend (./start.sh --with-backend) or set LE_IOTA_DID env var.');
+        log('CREDENTIAL', 'Warning: Could not establish reverse link for Direction 2');
     }
 
     const linkedIds = [linkedIotaDid];

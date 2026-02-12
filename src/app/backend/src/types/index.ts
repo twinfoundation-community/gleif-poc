@@ -22,6 +22,7 @@ export interface TrustAnchorConfig {
     passcode: string;
     oobi: string;
     lei: string;
+    registryId?: string;
     iotaDid?: string;
   };
   qviCredential: {
