@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { verifyLinkage } from '../api/client';
+import { verifyLinkage, fetchKeriCesr } from '../api/client';
 import type { DidLinkageResult, PublicTrustChainConfig } from '@gleif/verifier-core';
 import { formatTimestamp } from '@gleif/verifier-core';
 
@@ -20,6 +20,8 @@ export function LinkageVerification({ config }: LinkageVerificationProps) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DidLinkageResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [keriCesr, setKeriCesr] = useState<string | null>(null);
+  const [cesrExpanded, setCesrExpanded] = useState(false);
 
   const handleVerify = async () => {
     if (!input.trim()) return;
@@ -27,10 +29,19 @@ export function LinkageVerification({ config }: LinkageVerificationProps) {
     setLoading(true);
     setError(null);
     setResult(null);
+    setKeriCesr(null);
+    setCesrExpanded(false);
 
     try {
       const res = await verifyLinkage(input.trim());
       setResult(res);
+
+      // fetch keri.cesr if we have an AID
+      if (res.leAid) {
+        fetchKeriCesr(res.leAid).then(setKeriCesr).catch((e) => {
+          console.warn('[keri.cesr] Failed to fetch:', e);
+        });
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       setError(message);
@@ -263,8 +274,10 @@ export function LinkageVerification({ config }: LinkageVerificationProps) {
             <div className="also-known-as-section">
               <h4 className="aka-title">alsoKnownAs Linkage Proof</h4>
               <p className="aka-explanation">
-                Both DID documents declare each other in their <code>alsoKnownAs</code> property,
-                proving the same entity controls both identities.
+                Both DID documents declare each other in their <code>alsoKnownAs</code> property.
+                Each side requires a different private key — an on-chain transaction (IOTA controller key)
+                and a signed ACDC credential (KERI key via Signify). Bidirectional linkage proves common
+                control: neither side alone can forge the other's assertion.
               </p>
 
               <div className="aka-json-grid">
@@ -300,6 +313,21 @@ export function LinkageVerification({ config }: LinkageVerificationProps) {
                 <div className="aka-not-verified">
                   <span className="cross">✗</span>
                   Not bidirectional: alsoKnownAs values do not match
+                </div>
+              )}
+
+              {keriCesr && (
+                <div className="cesr-section">
+                  <button
+                    className="cesr-toggle"
+                    onClick={() => setCesrExpanded(!cesrExpanded)}
+                  >
+                    <span className="cesr-toggle-icon">{cesrExpanded ? '▼' : '▶'}</span>
+                    {' '}keri.cesr (KERI Event Log)
+                  </button>
+                  {cesrExpanded && (
+                    <pre className="aka-json cesr-content">{keriCesr}</pre>
+                  )}
                 </div>
               )}
             </div>

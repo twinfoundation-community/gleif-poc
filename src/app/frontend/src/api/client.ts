@@ -61,6 +61,14 @@ async function verifyLinkageFromIota(didIota: string): Promise<DidLinkageResult>
   return handleResponse<DidLinkageResult>(response);
 }
 
+export async function fetchKeriCesr(aid: string): Promise<string> {
+  const response = await fetch(`${API_BASE}/keri/${aid}/keri.cesr`);
+  if (!response.ok) {
+    throw new ApiError('Failed to fetch keri.cesr', response.status);
+  }
+  return response.text();
+}
+
 export async function verifyLinkage(did: string): Promise<DidLinkageResult> {
   if (did.startsWith('did:webs:')) {
     return verifyLinkageFromWebs(did);

@@ -703,6 +703,44 @@
   font-size: 1rem;
 }
 
+/* keri.cesr collapsible section */
+.cesr-section {
+  margin-top: 1rem;
+}
+
+.cesr-toggle {
+  background: none;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #4a9eff;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  text-align: left;
+}
+
+.cesr-toggle:hover {
+  color: #6ab0ff;
+  border-color: #555;
+}
+
+.cesr-toggle-icon {
+  font-size: 0.7rem;
+}
+
+.cesr-content {
+  max-height: 400px;
+  overflow: auto;
+  margin-top: 0.5rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: #f0f0f0;
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .app {
