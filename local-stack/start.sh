@@ -9,6 +9,11 @@ set -e
 
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
+# load root .env as exported env vars
+set -a
+source "$PROJECT_ROOT/.env"
+set +a
+
 # parse args
 WITH_BACKEND=false
 for arg in "$@"; do
@@ -42,12 +47,6 @@ if [[ "$WITH_BACKEND" == "true" ]]; then
 else
     export WEBHOOK_HOST=http://hook:9923
 fi
-
-export DIRECT_SALLY_KS_NAME=direct-sally
-export DIRECT_SALLY_ALIAS=direct-sally
-export DIRECT_SALLY_PASSCODE=4TBjjhmKu9oeDp49J7Xdy
-export DIRECT_SALLY_SALT=0ABVqAtad0CBkhDhCEPd514T
-export DIRECT_SALLY_PRE=ECLwKe5b33BaV20x7HZWYi_KUXgY91S41fRL2uCaf4WQ
 
 # read GLEIF AID from trust anchors if it exists
 TRUST_ANCHORS_FILE="$PROJECT_ROOT/scripts/.trust-anchors.json"

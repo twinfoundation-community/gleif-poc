@@ -11,6 +11,8 @@ networks:
 
 services:
   backend:
+    env_file:
+      - ../.env
     build:
       context: ..
       dockerfile: src/app/backend/Dockerfile

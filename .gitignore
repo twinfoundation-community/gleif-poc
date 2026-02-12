@@ -9,7 +9,7 @@ dist/
 contracts/*/build/
 contracts/*/Move.lock
 
-# Local environment overrides (base .env files are kept for PoC)
+# Local environment overrides
 .env.local
 .env.*.local
 
