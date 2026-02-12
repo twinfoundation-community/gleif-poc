@@ -121,11 +121,10 @@ interface TrustAnchorConfig {
 }
 
 // detect docker vs podman -- same logic as local-stack/start.sh
+// container name is fixed via docker-compose.names.yaml override
 async function getContainerRuntime(): Promise<{ docker: string; containerName: string }> {
-    // Container name is the same for both docker-compose and podman-compose
-    const containerName = 'keria_docker_direct-sally_1';
+    const containerName = 'direct-sally';
 
-    // Try docker first
     try {
         await execAsync('docker --version');
         return { docker: 'docker', containerName };
@@ -133,7 +132,6 @@ async function getContainerRuntime(): Promise<{ docker: string; containerName: s
         // Docker not available, try podman
     }
 
-    // Try podman
     try {
         await execAsync('podman --version');
         return { docker: 'podman', containerName };
@@ -994,7 +992,7 @@ async function main() {
     } catch (err: any) {
         log('SALLY', `Warning: Could not configure Sally trust anchor: ${err.message || err}`);
         log('SALLY', 'Manual configuration required:');
-        log('SALLY', `  docker exec keria_docker_direct-sally_1 kli oobi resolve --name ${SALLY_KS_NAME} --passcode ${SALLY_PASSCODE} --oobi "${gleifAid.oobi}"`);
+        log('SALLY', `  docker exec direct-sally kli oobi resolve --name ${SALLY_KS_NAME} --passcode ${SALLY_PASSCODE} --oobi "${gleifAid.oobi}"`);
     }
 
     // step 17: pre-load QVI credential into Sally so she can walk the chain
@@ -1131,7 +1129,7 @@ async function main() {
             console.log('    - Ensure Sally is running and accessible from KERIA');
         }
         if (!sallyGleifOobiResolved) {
-            console.log(`    - docker exec keria_docker_direct-sally_1 kli oobi resolve --name ${SALLY_KS_NAME} --passcode ${SALLY_PASSCODE} --oobi "${gleifAid.oobi}"`);
+            console.log(`    - docker exec direct-sally kli oobi resolve --name ${SALLY_KS_NAME} --passcode ${SALLY_PASSCODE} --oobi "${gleifAid.oobi}"`);
         }
         if (!sallyQviCredPreloaded) {
             console.log('    - Present QVI credential to Sally (via IPEX grant from GLEIF to Sally)');

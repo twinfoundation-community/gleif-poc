@@ -1,0 +1,7 @@
+# explicit container names so scripts can reference them
+# without worrying about compose v1/v2/podman naming conventions
+services:
+  vlei-server:
+    container_name: vlei-server
+  direct-sally:
+    container_name: direct-sally

@@ -15,8 +15,17 @@ src/app/
 ### Frontend
 
 ```bash
-cd frontend
+# from the project root -- builds workspace packages first
 npm install
+npm run dev:frontend
+```
+
+Or manually:
+
+```bash
+npm install
+npm run build:packages   # builds @gleif/verifier-core + @gleif/verifier-node
+cd src/app/frontend
 npm run dev
 ```
 

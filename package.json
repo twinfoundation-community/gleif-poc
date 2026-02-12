@@ -3,5 +3,9 @@
   "workspaces": [
     "src/packages/*",
     "src/app/*"
-  ]
+  ],
+  "scripts": {
+    "build:packages": "npm run build -w src/packages/gleif-verifier-core && npm run build -w src/packages/gleif-verifier-node",
+    "dev:frontend": "npm run build:packages && npm run dev -w src/app/frontend"
+  }
 }

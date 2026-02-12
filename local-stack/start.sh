@@ -7,9 +7,7 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-QVI_DIR="$PROJECT_ROOT/qvi-software/qvi-workflow/keria_docker"
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 # parse args
 WITH_BACKEND=false
@@ -25,22 +23,6 @@ for arg in "$@"; do
 done
 
 cd "$QVI_DIR"
-
-# prefer docker; fall back to podman
-if command -v docker &>/dev/null; then
-    DOCKER_CMD="docker"
-    COMPOSE_CMD="docker compose"
-elif command -v podman &>/dev/null; then
-    DOCKER_CMD="podman"
-    if command -v podman-compose &>/dev/null; then
-        COMPOSE_CMD="podman-compose"
-    else
-        COMPOSE_CMD="podman compose"
-    fi
-else
-    echo "error: neither docker nor podman found"
-    exit 1
-fi
 
 echo "Using: $DOCKER_CMD / $COMPOSE_CMD"
 
@@ -96,7 +78,7 @@ fi
 echo ""
 
 # start core services -- skip qvi-tools since it needs tsx
-$COMPOSE_CMD -f docker-compose-keria_signify_qvi.yaml up -d \
+$COMPOSE_CMD -f docker-compose-keria_signify_qvi.yaml -f "$NAMES_OVERRIDE" up -d \
     vlei-server \
     gar-witnesses \
     qar-witnesses \
@@ -117,16 +99,16 @@ if [[ -d "$SCRIPT_DIR/schemas" ]] && ls "$SCRIPT_DIR/schemas"/*.json 1>/dev/null
     echo "copying extra schemas to vLEI server..."
     for schema in "$SCRIPT_DIR/schemas"/*.json; do
         if [[ -f "$schema" ]]; then
-            $DOCKER_CMD cp "$schema" keria_docker_vlei-server_1:/vLEI/schema/
+            $DOCKER_CMD cp "$schema" vlei-server:/vLEI/schema/
             echo "  Copied: $(basename "$schema")"
         fi
     done
     echo "restarting vLEI server to pick up new schemas..."
-    $DOCKER_CMD restart keria_docker_vlei-server_1
+    $DOCKER_CMD restart vlei-server
     sleep 3
 fi
 
-$COMPOSE_CMD -f docker-compose-keria_signify_qvi.yaml ps
+$COMPOSE_CMD -f docker-compose-keria_signify_qvi.yaml -f "$NAMES_OVERRIDE" ps
 
 echo ""
 
@@ -207,7 +189,7 @@ if [[ "$WITH_BACKEND" == "true" ]]; then
 fi
 
 cd "$QVI_DIR"
-echo "To check service status: cd $QVI_DIR && $COMPOSE_CMD -f docker-compose-keria_signify_qvi.yaml ps"
+echo "To check service status: cd $QVI_DIR && $COMPOSE_CMD -f docker-compose-keria_signify_qvi.yaml -f $NAMES_OVERRIDE ps"
 echo "To view resolver logs: $DOCKER_CMD logs -f $DID_WEBS_RESOLVER_CONTAINER"
 echo "To view compose logs: cd $QVI_DIR && $COMPOSE_CMD -f docker-compose-keria_signify_qvi.yaml logs -f [service]"
 if [[ "$WITH_BACKEND" == "true" ]]; then
