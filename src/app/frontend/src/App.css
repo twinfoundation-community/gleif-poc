@@ -112,6 +112,17 @@
   color: #ccc;
 }
 
+.poc-section p {
+  color: #bbb;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.poc-flow code {
+  color: #bbb;
+  font-size: 0.8rem;
+}
+
 .poc-demo-note {
   background: #1a1a1a;
   border-radius: 4px;
