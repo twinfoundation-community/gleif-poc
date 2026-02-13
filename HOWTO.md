@@ -92,7 +92,7 @@ Opens at http://localhost:5173. If that port's taken, Vite auto-increments -- ch
 
 ### Option A: Via Frontend UI
 
-1. Open the URL shown by `npm run dev` (default: http://localhost:5173)
+1. Open the URL shown by `npm run dev:frontend` (default: http://localhost:5173)
 2. **Trust Chain Panel**: Shows configured GLEIF → QVI → LE chain
 3. **Verify LE Credential**: Click "Verify" - submits credential to Sally
 4. **Mint NFT**: After verification succeeds, click "Mint NFT Attestation"
@@ -144,8 +144,7 @@ A default `NFT_MNEMONIC` is already configured in the root `.env`. If you'd rath
 Skip this if you're fine with the default mnemonic in `.env`.
 
 ```bash
-cd src/app/backend
-node -e "const bip39 = require('@scure/bip39'); const { wordlist } = require('@scure/bip39/wordlists/english'); console.log(bip39.generateMnemonic(wordlist, 256));"
+npx @iota/iota-sdk mnemonics
 ```
 
 Then replace `NFT_MNEMONIC` in the root `.env` with the output and restart the backend:

@@ -207,9 +207,9 @@ All examples below are from the actual running instance. AIDs, SAIDs, and DIDs a
 
 | Role | AID | LEI |
 |------|-----|-----|
-| GLEIF (root) | `EDpqE29yQOa4tFJgaanyVNGHowPAeGfbSNJFcq5vdmRn` | -- |
-| QVI (issuer) | `EGMpRb3F_7sFiS4P66JF4SF2R5ak71Jexh768rCqOtPs` | -- |
-| Legal Entity | `ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8` | `5493001KJTIIGC8Y1R12` |
+| GLEIF (root) | `EL7qP_alwRFsib0RBDGdQaRP9TeZgiPNCa5BP-iOgulg` | -- |
+| QVI (issuer) | `EBR0UdagzMYgTNKjdihAhoyMX7Vc9ixi2gPBG63per6r` | -- |
+| Legal Entity | `EINvX35WDwPsRTGUxYEBlFdbD-AcEfFJrjVuElja5mI_` | `5493001KJTIIGC8Y1R12` |
 
 Each AID is a self-certifying KERI identifier derived from an Ed25519 public key. The `E` prefix is the CESR derivation code for a self-addressing identifier (Blake3-256 digest of inception event).
 
@@ -217,26 +217,26 @@ Each AID is a self-certifying KERI identifier derived from an Ed25519 public key
 
 **QVI Credential** (GLEIF issues to QVI):
 ```
-SAID:   EAlKZCfyY3tjiJfnKeGKKyIN9TZZCmNNgylqLoUCwhsK
+SAID:   EIM8ij-kl5cxUvW791_OFFXz746LpDyaOwmPfp7BAbAH
 Schema: EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao  (QVI vLEI schema)
-Issuer: EDpqE29yQOa4tFJgaanyVNGHowPAeGfbSNJFcq5vdmRn  (GLEIF)
-Issuee: EGMpRb3F_7sFiS4P66JF4SF2R5ak71Jexh768rCqOtPs  (QVI)
+Issuer: EL7qP_alwRFsib0RBDGdQaRP9TeZgiPNCa5BP-iOgulg  (GLEIF)
+Issuee: EBR0UdagzMYgTNKjdihAhoyMX7Vc9ixi2gPBG63per6r  (QVI)
 ```
 
 **LE Credential** (QVI issues to Legal Entity):
 ```
-SAID:   ECXuBj5qZqJnczALvPOYaARSkP0j2JGQuJAyGp0PBJjp
+SAID:   ELQb4yL9pGoKNcgpwkVgPQ-2KpxZ0ZH18ida3wog4DcL
 Schema: ENPXp1vQzRF6JwIuS-mp2U8Uf1MoADoP_GqQ62VsDZWY  (LE vLEI schema)
-Issuer: EGMpRb3F_7sFiS4P66JF4SF2R5ak71Jexh768rCqOtPs  (QVI)
-Issuee: ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8  (LE)
+Issuer: EBR0UdagzMYgTNKjdihAhoyMX7Vc9ixi2gPBG63per6r  (QVI)
+Issuee: EINvX35WDwPsRTGUxYEBlFdbD-AcEfFJrjVuElja5mI_  (LE)
 ```
 
 **Designated Aliases Credential** (LE self-issues):
 ```
-SAID:   EGLIvP1924ZsA3hZnBDCV2qZkO3LQWiUjfi7YN2sgVEm
+SAID:   EIao-ml2vzmNL8D3B7Pozw8F3MLg5g6miJDlLPvpWBaJ
 Schema: EN6Oh5XSD5_q2Hgu-aqpdfbVepdpYpFlgz6zvJL5b_r5  (DA schema)
-Issuer: ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8  (LE -- self-issued)
-IDs:    ["did:iota:testnet:0x6b4dbe57b15ec05cd93a833f4b2c4a1a7bfdcf0f64c1c92d91f316974d0aed9a"]
+Issuer: EINvX35WDwPsRTGUxYEBlFdbD-AcEfFJrjVuElja5mI_  (LE -- self-issued)
+IDs:    ["did:iota:testnet:0xe547095f2b0a482edac21b41da48e393e9f060fb519f3ebae0e920dab6ccb29f"]
 ```
 
 Note the chain: each credential's issuer is the issuee of the credential above it. The DA credential is self-issued -- issuer and controller are the same AID.
@@ -248,15 +248,15 @@ The Designated Aliases credential as it appears in the KERI CESR stream:
 ```json
 {
   "v":  "ACDC10JSON0004bb_",
-  "d":  "EGLIvP1924ZsA3hZnBDCV2qZkO3LQWiUjfi7YN2sgVEm",
-  "i":  "ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8",
-  "ri": "ED-MBYmbroJvFCbIQ1PzaNlysRrevtudAokwSaWBiNgs",
+  "d":  "EIao-ml2vzmNL8D3B7Pozw8F3MLg5g6miJDlLPvpWBaJ",
+  "i":  "EINvX35WDwPsRTGUxYEBlFdbD-AcEfFJrjVuElja5mI_",
+  "ri": "ECFO_baV1sy5j0vSm8bhdP0uFsP0tJtRF48Nu3cwo2XN",
   "s":  "EN6Oh5XSD5_q2Hgu-aqpdfbVepdpYpFlgz6zvJL5b_r5",
   "a": {
     "d":  "EFvoTtftLOHUCJdTEH1hxYo0nzhzxcdK79O6IJ9w4Olo",
     "dt": "2026-02-08T06:26:36.937000+00:00",
     "ids": [
-      "did:iota:testnet:0x6b4dbe57b15ec05cd93a833f4b2c4a1a7bfdcf0f64c1c92d91f316974d0aed9a"
+      "did:iota:testnet:0xe547095f2b0a482edac21b41da48e393e9f060fb519f3ebae0e920dab6ccb29f"
     ]
   },
   "r": {
@@ -289,27 +289,28 @@ The Designated Aliases credential as it appears in the KERI CESR stream:
 
 ### What a `did:webs` Document Looks Like
 
-`did:webs:backend:keri:ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8` (Legal Entity):
+`did:webs:backend:keri:EINvX35WDwPsRTGUxYEBlFdbD-AcEfFJrjVuElja5mI_` (Legal Entity):
 
 ```json
 {
-  "id": "did:webs:localhost%3A3000:keri:ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8",
+  "id": "did:webs:backend:keri:EINvX35WDwPsRTGUxYEBlFdbD-AcEfFJrjVuElja5mI_",
   "verificationMethod": [{
-    "id": "#DDpeZ25NNVTzgBad00Vpe1qTK5mz_QYkOkdKo6kDbHgY",
+    "id": "#DALcOjPQsYb3gOjl7AwMXHY2kGwhePAfdAuDSnVEyRy7",
     "type": "JsonWebKey",
-    "controller": "did:webs:localhost%3A3000:keri:ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8",
+    "controller": "did:webs:backend:keri:EINvX35WDwPsRTGUxYEBlFdbD-AcEfFJrjVuElja5mI_",
     "publicKeyJwk": {
-      "kid": "DDpeZ25NNVTzgBad00Vpe1qTK5mz_QYkOkdKo6kDbHgY",
+      "kid": "DALcOjPQsYb3gOjl7AwMXHY2kGwhePAfdAuDSnVEyRy7",
       "kty": "OKP",
       "crv": "Ed25519",
-      "x": "Ol5nbk01VPOAFp3TRWl7WpMrmbP9BiQ6R0qjqQNseBg"
+      "x": "Atw6M9CxhveA6OXsDAxcdjaQbCF48B90C4NKdUTJHLs"
     }
   }],
   "service": [],
   "alsoKnownAs": [
-    "did:iota:testnet:0x6b4dbe57b15ec05cd93a833f4b2c4a1a7bfdcf0f64c1c92d91f316974d0aed9a",
-    "did:keri:ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8",
-    "did:web:localhost%3A3000:keri:ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8"
+    "did:webs:backend:keri:EINvX35WDwPsRTGUxYEBlFdbD-AcEfFJrjVuElja5mI_",
+    "did:iota:testnet:0xe547095f2b0a482edac21b41da48e393e9f060fb519f3ebae0e920dab6ccb29f",
+    "did:keri:EINvX35WDwPsRTGUxYEBlFdbD-AcEfFJrjVuElja5mI_",
+    "did:web:backend:keri:EINvX35WDwPsRTGUxYEBlFdbD-AcEfFJrjVuElja5mI_"
   ]
 }
 ```
@@ -320,13 +321,13 @@ The `verificationMethod` exposes the LE's Ed25519 public key in JWK format. The 
 
 ### What a `did:iota` Document Looks Like
 
-[`did:iota:testnet:0x6b4dbe57b15ec05cd93a833f4b2c4a1a7bfdcf0f64c1c92d91f316974d0aed9a`](https://explorer.iota.org/object/0x6b4dbe57b15ec05cd93a833f4b2c4a1a7bfdcf0f64c1c92d91f316974d0aed9a?network=testnet) (same Legal Entity, on-chain):
+[`did:iota:testnet:0xe547095f2b0a482edac21b41da48e393e9f060fb519f3ebae0e920dab6ccb29f`](https://explorer.iota.org/object/0xe547095f2b0a482edac21b41da48e393e9f060fb519f3ebae0e920dab6ccb29f?network=testnet) (same Legal Entity, on-chain):
 
 ```json
 {
-  "id": "did:iota:testnet:0x6b4dbe57b15ec05cd93a833f4b2c4a1a7bfdcf0f64c1c92d91f316974d0aed9a",
+  "id": "did:iota:testnet:0xe547095f2b0a482edac21b41da48e393e9f060fb519f3ebae0e920dab6ccb29f",
   "alsoKnownAs": [
-    "did:webs:backend:keri:ELyw5WNsfXL7AxtnYaVWM2S0quKIuBWZmgHnUKfUaGo8"
+    "did:webs:backend:keri:EINvX35WDwPsRTGUxYEBlFdbD-AcEfFJrjVuElja5mI_"
   ],
   "service": [{
     "id": "...#revocation",

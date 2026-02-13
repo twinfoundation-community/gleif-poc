@@ -61,7 +61,6 @@ src/
     frontend/              # React UI for verification and attestation
 scripts/
   setup-trust-anchors.ts # Automated trust chain + DID linkage setup
-  test-keria.ts          # Infrastructure connectivity validation
 local-stack/
   docker-compose.backend.yaml
   start.sh / stop.sh     # Orchestrate KERIA, Sally, witnesses, resolver
@@ -93,15 +92,18 @@ local-stack/
 | `/keri/aids` | GET | List available AIDs from trust anchors |
 | `/keri/:aid/did.json` | GET | did:webs DID document |
 | `/keri/:aid/keri.cesr` | GET | KERI event log (CESR) |
+| `/keri/:aid/publish` | POST | Browser pushes DID document + DA CESR after issuance |
 | `/api/webhook/sally` | POST | Sally verification callback |
 
 ## Local Service Ports
 
 | Service | URL | Notes |
 |---------|-----|-------|
+| Backend | `http://localhost:3000` | Express API + KEL publisher |
 | Schema Server | `http://localhost:7723` | `/health`, `/oobi/{SAID}` |
 | KERIA API | `http://localhost:3901` | signify-ts client endpoint |
 | KERIA Boot | `http://localhost:3903` | Agent provisioning |
+| DID-WEBS Resolver | `http://localhost:7677` | `did:webs` resolution |
 | Sally | `http://localhost:9823` | No witnesses needed |
 | Webhook | `http://localhost:9923` | Demo webhook receiver |
 | Witnesses | `http://localhost:5642-5645` | 4 local witnesses |
