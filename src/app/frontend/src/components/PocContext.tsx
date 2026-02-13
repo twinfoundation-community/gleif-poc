@@ -81,10 +81,20 @@ export function PocContext() {
             </p>
           </div>
 
+          <div className="poc-section">
+            <h4>Browser-side KERI (this PoC)</h4>
+            <ul>
+              <li><strong>signify-ts runs in the browser</strong> - credential presentation and KERI signing happen client-side, not on the backend</li>
+              <li><strong>Passcode</strong> - loaded from backend config for convenience; in production, the user enters it and it never leaves their device</li>
+              <li><strong>KERIA connection</strong> -- the browser talks directly to the KERI cloud agent via HTTP</li>
+              <li><strong>Backend</strong> - only handles IOTA on-chain operations and receives Sally's webhook callback</li>
+            </ul>
+          </div>
+
           <p className="poc-demo-note">
-            <strong>What this demo actually shows:</strong> The runtime verification flow — presenting
-            credentials to Sally, walking the trust chain, verifying DID linkage in both directions,
-            and minting an on-chain attestation.
+            <strong>What this demo actually shows:</strong> The runtime verification flow -- presenting
+            credentials to Sally from the browser via signify-ts, walking the trust chain, verifying
+            DID linkage in both directions, and minting an on-chain attestation.
           </p>
         </div>
       )}

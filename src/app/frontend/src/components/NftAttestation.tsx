@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { NftAttestation, VerificationResult } from '@gleif/verifier-core';
 import { decodeVcJwt, verifyVcSignature, base64urlToBytes } from '@gleif/verifier-core';
-import { mintNft, ApiError } from '../api/client';
-
-const API_BASE = 'http://localhost:3000';
+import { mintNft, ApiError, API_BASE } from '../api/client';
 
 interface Props {
   verificationResult: VerificationResult;
@@ -84,7 +82,7 @@ export function NftAttestation({ verificationResult, onMintComplete, existingAtt
     setError(null);
     setVcState({ status: 'idle' });
     try {
-      const attestation = await mintNft();
+      const attestation = await mintNft(verificationResult);
       onMintComplete(attestation);
     } catch (err) {
       const message = err instanceof ApiError

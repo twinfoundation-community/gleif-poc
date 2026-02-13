@@ -4,10 +4,8 @@
 import { IotaIdentityConnector } from '@twin.org/identity-connector-iota';
 import { IotaIdentityResolverConnector } from '@twin.org/identity-connector-iota';
 import { IdentityConnectorFactory, IdentityResolverConnectorFactory } from '@twin.org/identity-models';
-import { getEnvConfig } from './config';
-
-/** Must match the key name used in iota-connector-setup. */
-const MNEMONIC_KEY_NAME = 'mnemonic';
+import { getEnvConfig, MNEMONIC_KEY_NAME } from './config';
+import { getExplorerUrl } from './iota-connector-setup';
 
 let identityConnector: IotaIdentityConnector | null = null;
 let identityResolver: IotaIdentityResolverConnector | null = null;
@@ -77,5 +75,5 @@ export function getDidExplorerUrl(did: string): string {
   // Extract object ID from did:iota:networkId:objectId
   const parts = did.split(':');
   const objectId = parts[parts.length - 1];
-  return `https://explorer.iota.org/object/${objectId}?network=testnet`;
+  return getExplorerUrl(objectId);
 }

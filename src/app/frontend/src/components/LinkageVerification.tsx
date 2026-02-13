@@ -15,6 +15,14 @@ function getIotaExplorerUrl(did: string): string {
   return `https://explorer.iota.org/object/${objectId}?network=testnet`;
 }
 
+function ExplorerLink({ did }: { did: string }) {
+  return (
+    <a href={getIotaExplorerUrl(did)} target="_blank" rel="noopener noreferrer" className="explorer-link">
+      View on IOTA Explorer &#8599;
+    </a>
+  );
+}
+
 export function LinkageVerification({ config }: LinkageVerificationProps) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -207,14 +215,7 @@ export function LinkageVerification({ config }: LinkageVerificationProps) {
               <div className="info-item">
                 <label>did:iota</label>
                 <code>{result.didIota}</code>
-                <a
-                  href={getIotaExplorerUrl(result.didIota)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="explorer-link"
-                >
-                  View on IOTA Explorer &#8599;
-                </a>
+                <ExplorerLink did={result.didIota} />
               </div>
             )}
 
@@ -222,14 +223,7 @@ export function LinkageVerification({ config }: LinkageVerificationProps) {
               <div className="info-item">
                 <label>Linked IOTA DID</label>
                 <code>{result.linkedIotaDid}</code>
-                <a
-                  href={getIotaExplorerUrl(result.linkedIotaDid)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="explorer-link"
-                >
-                  View on IOTA Explorer &#8599;
-                </a>
+                <ExplorerLink did={result.linkedIotaDid} />
               </div>
             )}
 

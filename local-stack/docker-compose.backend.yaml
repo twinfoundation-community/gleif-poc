@@ -33,6 +33,8 @@ services:
       - SALLY_URL=http://direct-sally:9823
       - KERIA_URL=http://keria1:3901
       - KERIA_BOOT_URL=http://keria1:3903
+      - KERIA_BROWSER_URL=http://localhost:3901
+      - KERIA_BROWSER_BOOT_URL=http://localhost:3903
       - DID_WEBS_RESOLVER_URL=http://did-webs-resolver:7677
       - IOTA_NODE_URL=https://api.testnet.iota.cafe
       # trust anchors config path (mounted volume)

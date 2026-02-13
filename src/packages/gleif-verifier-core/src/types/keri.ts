@@ -25,6 +25,8 @@ export interface KeriCredential {
   sad: {
     /** Credential SAID */
     d: string;
+    /** Issuer AID */
+    i: string;
     /** Schema SAID */
     s: string;
     /** Attributes */
@@ -45,7 +47,7 @@ export interface KeriCredential {
 /** KERI operation result from signify-ts */
 export interface KeriOperation {
   name: string;
-  done: boolean;
+  done?: boolean;
   metadata?: {
     depends?: {
       name: string;

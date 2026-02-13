@@ -52,18 +52,3 @@ export interface TrustAnchorConfig {
   timestamp: string;
 }
 
-// Re-export KERI types from shared package
-export type { KeriKeyState, KeriCredential, KeriOperation } from '@gleif/verifier-core';
-
-/** verification method in DID document -- for did:webs */
-export interface DidWebsVerificationMethod {
-  id: string;
-  type: string;
-  controller: string;
-  publicKeyJwk: {
-    kid: string;
-    kty: string;
-    crv: string;
-    x: string;
-  };
-}

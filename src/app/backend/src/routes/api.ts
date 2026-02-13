@@ -1,8 +1,8 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { getPublicConfig, loadTrustAnchors, getEnvConfig } from '../services/config';
-import { verifyLeCredential, checkSallyStatus } from '../services/sally-client';
+import { getPublicConfig, loadTrustAnchors, getPocConfig } from '../services/config';
+import { checkSallyStatus } from '../services/sally-client';
 import { mintAttestationNft, type LinkageInfo, type TrustChainInfo } from '../services/attestation-service';
-import { resolveVerification } from '../services/verification-state';
+import { resolveVerification, storeCompletedResult, getCompletedResult } from '../services/verification-state';
 import { resolveDid } from '../services/did-webs-client';
 import { verifyDidLinking } from '../services/did-linking-verifier';
 import {
@@ -18,13 +18,12 @@ import {
   getErrorMessage,
   extractIotaDid,
   extractKeriServiceEndpoint,
+  bytesToBase64url,
   type VerificationResult,
 } from '@gleif/verifier-core';
+import { fromBase58 } from '@iota/iota-sdk/utils';
 
 const router: express.Router = express.Router();
-
-// Store the last verification result for the mint endpoint
-let lastVerificationResult: VerificationResult | null = null;
 
 /**
  * GET /api/config
@@ -37,6 +36,34 @@ router.get('/config', async (_req: Request, res: Response, next: NextFunction) =
   } catch (error) {
     next(error);
   }
+});
+
+/**
+ * GET /api/poc-config
+ * Returns config including LE passcode and KERIA URLs for browser-side signify-ts.
+ * PoC only -- in production, the passcode is user-provided and never leaves the device.
+ */
+router.get('/poc-config', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const config = getPocConfig();
+    res.json(config);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/verification-status/:said
+ * Poll for a completed verification result (browser-side flow).
+ */
+router.get('/verification-status/:said', async (req: Request, res: Response) => {
+  const said = req.params.said as string;
+  const result = getCompletedResult(said);
+  if (!result) {
+    res.json({ pending: true });
+    return;
+  }
+  res.json({ pending: false, result });
 });
 
 /**
@@ -66,33 +93,18 @@ router.get('/status', async (_req: Request, res: Response, next: NextFunction) =
 });
 
 /**
- * POST /api/verify
- * Trigger Sally verification for the pre-configured test LE
- */
-router.post('/verify', async (_req: Request, res: Response, next: NextFunction) => {
-  try {
-    const result = await verifyLeCredential();
-
-    // Store for potential NFT minting
-    lastVerificationResult = result;
-
-    res.json(result);
-  } catch (error) {
-    next(error);
-  }
-});
-
-/**
  * POST /api/nft/mint
- * Mint a vLEI linkage attestation on IOTA
+ * Mint a vLEI linkage attestation on IOTA.
+ * Accepts verificationResult in the body (from browser-side verification).
  */
 router.post('/nft/mint', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const verificationResult = lastVerificationResult;
+    const verificationResult: VerificationResult | null =
+      req.body?.verificationResult ?? null;
 
     if (!verificationResult) {
       res.status(400).json({
-        error: 'No verification result available. Run /api/verify first.',
+        error: 'No verification result available. Run verification first.',
       });
       return;
     }
@@ -156,6 +168,35 @@ router.get('/resolve-did/:did', async (req: Request, res: Response, next: NextFu
 
     console.log(`Resolving DID: ${did}`);
 
+    // Route did:iota to the IOTA identity resolver
+    if (did.startsWith('did:iota:')) {
+      const iotaDoc = await resolveIotaDid(did);
+
+      // Normalize publicKeyMultibase → publicKeyJwk so consumers get a uniform format
+      if (iotaDoc.verificationMethod) {
+        for (const vm of iotaDoc.verificationMethod) {
+          const multibase = vm.publicKeyMultibase;
+          if (multibase && !(vm as Record<string, unknown>).publicKeyJwk && multibase.startsWith('z')) {
+            const decoded = fromBase58(multibase.slice(1)); // strip 'z' (base58btc) prefix
+            const rawKey = decoded.slice(2);                // strip 2-byte Ed25519 multicodec header (0xed01)
+            (vm as Record<string, unknown>).publicKeyJwk = {
+              kty: 'OKP',
+              crv: 'Ed25519',
+              x: bytesToBase64url(rawKey),
+            };
+          }
+        }
+      }
+
+      res.json({
+        document: iotaDoc,
+        iotaDid: null,
+        keriServiceEndpoint: null,
+        hasIotaLinkage: false,
+      });
+      return;
+    }
+
     const document = await resolveDid(did);
     const iotaDid = extractIotaDid(document);
     const keriServiceEndpoint = extractKeriServiceEndpoint(document);
@@ -184,8 +225,8 @@ router.get('/resolve-did/:did', async (req: Request, res: Response, next: NextFu
  *
  * Body: { didWebs: string }
  *
- * Resolves did:webs -> extracts linked did:iota -> verifies bidirectional link
- * -> presents LE credential to Sally via IPEX -> Sally walks the trust chain
+ * Resolves did:webs -> extracts linked did:iota -> verifies bidirectional link.
+ * Credential verification (IPEX grant to Sally) runs browser-side.
  */
 router.post('/verify-did-linking', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -208,11 +249,6 @@ router.post('/verify-did-linking', async (req: Request, res: Response, next: Nex
     console.log(`Starting DID linking verification for: ${didWebs}`);
 
     const result = await verifyDidLinking(didWebs);
-
-    // Store for potential NFT minting
-    if (result.verified) {
-      lastVerificationResult = result;
-    }
 
     res.json(result);
   } catch (error: unknown) {
@@ -473,6 +509,15 @@ router.post('/webhook/sally', async (req: Request, res: Response, next: NextFunc
 
     // Resolve any pending verification for this credential
     const resolved = resolveVerification(credentialSaid, verified, revoked);
+
+    // Store for browser polling (LE AID/LEI from trust anchors)
+    try {
+      const taConfig = loadTrustAnchors();
+      storeCompletedResult(credentialSaid, verified, revoked, taConfig.le.aid, taConfig.le.lei);
+    } catch {
+      // trust anchors might not be loaded
+      storeCompletedResult(credentialSaid, verified, revoked, '', '');
+    }
 
     res.status(200).json({
       received: true,

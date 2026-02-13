@@ -58,7 +58,7 @@ import { DidLinkingVerifier } from '@gleif/verifier-node';
 import type { DidLinkingVerificationResult } from '@gleif/verifier-node';
 
 // Orchestrates bidirectional DID linkage verification
-// deps: resolveDidWebs, getDidDocument, resolveIotaDid, extractWebsDid, verifyLeCredential
+// deps: resolveDidWebs, getDidDocument, resolveIotaDid, extractWebsDid
 const verifier = new DidLinkingVerifier(deps, { kelPublisherDomain: 'localhost' });
 const result: DidLinkingVerificationResult = await verifier.verify('did:webs:example.com:keri:ABC123');
 ```

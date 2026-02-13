@@ -10,12 +10,7 @@ import {
   type IotaAlsoKnownAsConfig,
 } from '@gleif/verifier-node';
 import { VaultConnectorFactory } from '@twin.org/vault-models';
-import { getEnvConfig } from './config';
-
-/**
- * Controller identity name (must match NFT/Identity connector setup)
- */
-const CONTROLLER_IDENTITY = process.env.NFT_IDENTITY || 'attestation-service';
+import { getEnvConfig, CONTROLLER_IDENTITY } from './config';
 
 /**
  * Get IOTA config from environment

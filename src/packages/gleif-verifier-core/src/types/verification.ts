@@ -19,3 +19,19 @@ export interface PublicTrustChainConfig {
   designatedAliasesCredential?: { said: string; linkedDids: string[] };
   sally: { configured: boolean };
 }
+
+/** PoC config extends public config with fields the browser needs for direct KERIA access */
+export interface PocBrowserConfig extends PublicTrustChainConfig {
+  poc: {
+    lePasscode: string;
+    leName: string;
+    keriaUrl: string;
+    keriaBootUrl: string;
+    sallyAid: string;
+    sallyOobi: string;
+    leCredentialSchemaSaid: string;
+    leRegistryId: string;
+    daCredentialSchemaSaid: string;
+    daCredentialSchemaOobi: string;
+  };
+}

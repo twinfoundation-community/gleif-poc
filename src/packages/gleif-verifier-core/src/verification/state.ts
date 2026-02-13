@@ -132,4 +132,41 @@ export class VerificationStateManager {
   getPendingSaids(): string[] {
     return Array.from(this.pendingVerifications.keys());
   }
+
+  // --- Poll-based pattern for browser-side verification ---
+
+  private completedVerifications = new Map<string, VerificationResult>();
+  private static COMPLETED_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+  /**
+   * Store a completed verification result.
+   * Browser can poll for this via getCompletedResult().
+   */
+  storeCompletedResult(
+    credentialSaid: string,
+    verified: boolean,
+    revoked: boolean,
+    leAid: string,
+    leLei: string
+  ): void {
+    const result: VerificationResult = {
+      verified,
+      revoked,
+      leAid,
+      leLei,
+      credentialSaid,
+      timestamp: isoTimestamp(),
+    };
+    this.completedVerifications.set(credentialSaid, result);
+
+    // TTL cleanup
+    setTimeout(() => {
+      this.completedVerifications.delete(credentialSaid);
+    }, VerificationStateManager.COMPLETED_TTL_MS);
+  }
+
+  /** Get a completed verification result (non-blocking, for polling). */
+  getCompletedResult(credentialSaid: string): VerificationResult | null {
+    return this.completedVerifications.get(credentialSaid) ?? null;
+  }
 }

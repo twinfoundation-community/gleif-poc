@@ -1,13 +1,12 @@
 /**
  * DID Linking Verifier
  *
- * Full DID linking verification flow:
+ * DID linkage verification flow:
  * 1. Resolve did:webs (dkr resolver, KEL publisher fallback)
  * 2. Extract alsoKnownAs (did:iota)
  * 3. Check bidirectional link (did:iota links back to did:webs)
- * 4. Present credential to Sally via IPEX
- * 5. Sally walks trust chain: LE -> QVI -> GLEIF root
- * 6. Return result with linked DID info + bidirectional status
+ *
+ * Credential verification (IPEX grant to Sally) happens browser-side
  */
 
 import {
@@ -56,8 +55,6 @@ interface DidLinkingDeps {
   resolveIotaDid: (did: string) => Promise<IotaDidDocLike>;
   /** Extract did:webs from a resolved IOTA DID document */
   extractWebsDid: (doc: IotaDidDocLike) => string | null;
-  /** Verify LE credential via Sally (IPEX grant + webhook) */
-  verifyLeCredential: () => Promise<VerificationResult>;
 }
 
 /** config for the DID linking verifier */
@@ -69,10 +66,11 @@ interface DidLinkingConfig {
 }
 
 /**
- * Orchestrates the full DID linking verification flow.
+ * Orchestrates DID linkage verification.
  *
- * Given a did:webs, verifies the DID document, bidirectional linkage
- * between did:webs and did:iota, and the vLEI trust chain via Sally.
+ * Given a did:webs, resolves the DID document, checks bidirectional
+ * linkage between did:webs and did:iota, and returns the result.
+ * Credential verification (vLEI trust chain) is handled browser-side.
  */
 export class DidLinkingVerifier {
   private readonly domain: string;
@@ -149,41 +147,23 @@ export class DidLinkingVerifier {
       }
     }
 
-    // Step 4: Verify credential via Sally
-    try {
-      const verificationResult = await this.deps.verifyLeCredential();
-
-      return {
-        ...verificationResult,
-        didWebs,
-        linkedIotaDid: linkedIotaDid || undefined,
-        bidirectional,
-        keriServiceEndpoint: keriServiceEndpoint || undefined,
-        websDocument: didDocument,
-        iotaDocument: iotaDocumentResolved,
-        websAlsoKnownAs: didDocument.alsoKnownAs || [],
-        iotaAlsoKnownAs,
-        daVerified,
-      };
-    } catch (error: unknown) {
-      return {
-        verified: false,
-        revoked: false,
-        leAid: '',
-        leLei: '',
-        credentialSaid: '',
-        timestamp: isoTimestamp(),
-        error: `Verification failed: ${getErrorMessage(error)}`,
-        didWebs,
-        linkedIotaDid: linkedIotaDid || undefined,
-        bidirectional,
-        keriServiceEndpoint: keriServiceEndpoint || undefined,
-        websDocument: didDocument,
-        iotaDocument: iotaDocumentResolved,
-        websAlsoKnownAs: didDocument.alsoKnownAs || [],
-        iotaAlsoKnownAs,
-        daVerified: false,
-      };
-    }
+    // DID linkage result -- credential verification happens browser-side
+    return {
+      verified: bidirectional,
+      revoked: false,
+      leAid: aid,
+      leLei: '',
+      credentialSaid: '',
+      timestamp: isoTimestamp(),
+      didWebs,
+      linkedIotaDid: linkedIotaDid || undefined,
+      bidirectional,
+      keriServiceEndpoint: keriServiceEndpoint || undefined,
+      websDocument: didDocument,
+      iotaDocument: iotaDocumentResolved,
+      websAlsoKnownAs: didDocument.alsoKnownAs || [],
+      iotaAlsoKnownAs,
+      daVerified,
+    };
   }
 }

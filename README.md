@@ -20,7 +20,7 @@ The idea is simple: take a Legal Entity's vLEI credential, verify it via the ful
 ### What this covers
 
 - **Full vLEI trust chain** -- GLEIF -> QVI -> LE credential issuance via IPEX protocol
-- **Sally-based verification** -- credential presentation to Sally, which walks the chain and returns results via webhook
+- **Sally-based verification** -- browser presents credential to Sally via IPEX (signify-ts runs in-browser), Sally walks the chain and returns results via webhook
 - **Bidirectional DID linking** -- `did:webs` document includes `alsoKnownAs: [did:iota:...]` and vice versa
 - **Designated Aliases credential** -- self-issued ACDC linking the LE's KERI identifier to their IOTA DID; cryptographically verified via dws resolver (CESR stream verification)
 - **LE-signed on-chain attestation** -- custom Move object (`VleiAttestation`) minted on IOTA testnet, containing a W3C VC JWT signed by the LE's KERI key -- independently verifiable via WebCrypto without KERI infrastructure
@@ -30,23 +30,23 @@ The idea is simple: take a Legal Entity's vLEI credential, verify it via the ful
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Frontend (React + Vite)                                │
-│  - Trigger verification, view results, mint NFTs        │
+│  Frontend (React + Vite + signify-ts)                   │
+│  - Credential presentation to Sally (IPEX via KERIA)    │
 │  - DID linkage verification (both directions)           │
-└──────────────────────┬──────────────────────────────────┘
-                       │ HTTP
-┌──────────────────────▼──────────────────────────────────┐
-│  Backend (Express)                                      │
-│  - signify-ts client (KERIA edge signing)               │
-│  - Sally credential presentation (IPEX grant)           │
-│  - KEL publisher (did:webs resolution)                  │
-│  - IOTA DID + attestation minting (@iota/iota-sdk)       │
-└────┬────────────┬────────────┬──────────────────────────┘
-     │            │            │
-┌────▼────┐ ┌────▼────┐ ┌─────▼─────┐
-│ KERIA   │ │  Sally  │ │ IOTA      │
-│ Agent   │ │ Verifier│ │ Testnet   │
-└─────────┘ └─────────┘ └───────────┘
+│  - View results, mint NFTs                              │
+└──────────┬───────────────────┬──────────────────────────┘
+           │ signify-ts        │ HTTP
+     ┌─────▼─────┐   ┌────────▼─────────────────────────────┐
+     │ KERIA     │   │  Backend (Express)                    │
+     │ Agent     │   │  - Sally webhook receiver              │
+     │    │ IPEX │   │  - KEL publisher (did:webs resolution) │
+     │ ┌──▼───┐  │   │  - IOTA DID + attestation minting     │
+     │ │Sally │  │   └────────────┬──────────────────────────┘
+     │ │Verif.│──┼── webhook ──►  │
+     │ └──────┘  │          ┌─────▼─────┐
+     └───────────┘          │ IOTA      │
+                            │ Testnet   │
+                            └───────────┘
 ```
 
 ### Monorepo Structure
@@ -79,8 +79,9 @@ local-stack/
 |----------|--------|---------|
 | `/health` | GET | Health check |
 | `/api/config` | GET | Public trust chain configuration |
+| `/api/poc-config` | GET | PoC config for browser-side signify-ts (KERIA URLs, LE passcode) |
 | `/api/status` | GET | System status (Sally, config) |
-| `/api/verify` | POST | Verify LE credential via Sally |
+| `/api/verification-status/:said` | GET | Poll for Sally verification result (browser flow) |
 | `/api/verify-did-linking` | POST | Bidirectional DID linkage verification |
 | `/api/verify-linkage/from-iota/:did` | GET | Reverse linkage (did:iota → did:webs) |
 | `/api/resolve-did/:did` | GET | Resolve did:webs or did:iota |

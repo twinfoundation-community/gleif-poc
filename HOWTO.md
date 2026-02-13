@@ -107,9 +107,6 @@ Opens at http://localhost:5173. If that port's taken, Vite auto-increments -- ch
 # Get trust chain config (includes linked DIDs)
 curl http://localhost:3000/api/config | jq .
 
-# Verify LE credential via Sally
-curl -X POST http://localhost:3000/api/verify | jq .
-
 # Mint attestation (requires verification first)
 curl -X POST http://localhost:3000/api/nft/mint \
   -H "Content-Type: application/json" -d '{}' | jq .
@@ -220,3 +217,11 @@ echo '{}' > scripts/.trust-anchors.json
 **Direction 2 shows "No did:webs found":** The reverse link didn't get added. Re-run setup-trust-anchors with the backend running, then restart the stack.
 
 **DID not found on IOTA Explorer:** If the backend wasn't running during `setup-trust-anchors`, the script falls back to a placeholder DID that doesn't actually exist on-chain. Re-run `setup-trust-anchors` with `--with-backend` active to create a real on-chain DID.
+
+**"DA Credential Unverified" after re-running setup:** The dkr's persistent database (`resolver-data` volume) accumulates DA credentials across runs. If the DA credential was issued more than once for the same AID, the dkr sees duplicate entries and produces an `alsoKnownAs` array that doesn't match the served document. Fix by resetting the resolver volume:
+```bash
+cd local-stack
+./stop.sh
+podman volume rm resolver-data 2>/dev/null
+./start.sh --with-backend
+```

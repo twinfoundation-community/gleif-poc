@@ -145,6 +145,233 @@
   padding-left: 1.25rem;
 }
 
+/* PoC disclaimer banner */
+.poc-disclaimer {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  color: #e0c060;
+  font-size: 0.85rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.poc-disclaimer strong {
+  color: #ffc107;
+}
+
+/* IOTA DID info panel */
+.iota-did-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.iota-did-info label {
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.iota-did-info code {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.85rem;
+  background: #2a2a2a;
+  padding: 0.5rem;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+/* Wizard group headers */
+.wizard-group-header {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4a9eff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.wizard-group-header:first-child {
+  margin-top: 0;
+}
+
+/* Wizard steps */
+.wizard-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.wizard-step {
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  transition: border-color 0.2s, opacity 0.2s;
+}
+
+.wizard-step--pending {
+  opacity: 0.5;
+}
+
+.wizard-step--active {
+  opacity: 1;
+  border-color: #4a9eff;
+}
+
+.wizard-step--done {
+  opacity: 1;
+  border-color: rgba(80, 200, 120, 0.4);
+}
+
+.wizard-step--error {
+  opacity: 1;
+  border-color: rgba(255, 80, 80, 0.4);
+}
+
+/* Next actionable pending step gets full opacity */
+.wizard-step--next {
+  opacity: 1;
+}
+
+.wizard-step-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wizard-step-indicator {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  border: 2px solid #555;
+  color: #888;
+}
+
+.wizard-step-indicator--pending {
+  border-color: #555;
+  color: #888;
+}
+
+.wizard-step-indicator--active {
+  border-color: #4a9eff;
+  color: #4a9eff;
+}
+
+.wizard-step-indicator--done {
+  border-color: #50c878;
+  background: rgba(80, 200, 120, 0.15);
+  color: #50c878;
+}
+
+.wizard-step-indicator--error {
+  border-color: #ff6b6b;
+  background: rgba(255, 80, 80, 0.15);
+  color: #ff6b6b;
+}
+
+.wizard-step-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.wizard-step-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #e0e0e0;
+}
+
+.wizard-step-desc {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 0.15rem;
+  line-height: 1.4;
+}
+
+.wizard-step-btn {
+  padding: 0.4rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #4a9eff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 72px;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.wizard-step-btn:hover:not(:disabled) {
+  background: #3a8eef;
+}
+
+.wizard-step-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #555;
+}
+
+.wizard-step--done .wizard-step-btn {
+  background: #3a5a3a;
+  cursor: default;
+}
+
+.wizard-step--error .wizard-step-btn:not(:disabled) {
+  background: #a05050;
+}
+
+.wizard-step-technical {
+  margin-top: 0.4rem;
+  padding-left: calc(28px + 0.75rem);
+}
+
+.wizard-step-technical code {
+  font-size: 0.72rem;
+  color: #666;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.wizard-step--active .wizard-step-technical code,
+.wizard-step--done .wizard-step-technical code {
+  color: #888;
+}
+
+.wizard-step-error {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  padding-left: calc(28px + 0.75rem);
+  background: rgba(255, 80, 80, 0.08);
+  border-radius: 4px;
+  color: #ff6b6b;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.wizard-step-result {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.75rem;
+  padding-left: calc(28px + 0.75rem);
+  background: rgba(80, 200, 120, 0.06);
+  border-radius: 4px;
+  color: #a0d0a0;
+  font-size: 0.78rem;
+  font-family: 'Monaco', 'Menlo', monospace;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
 /* Panel styles */
 .panel {
   background: #1a1a1a;
@@ -164,11 +391,6 @@
   font-size: 1rem;
   font-weight: 500;
   color: #aaa;
-}
-
-/* Config info */
-.config-info {
-  margin-bottom: 1.5rem;
 }
 
 .info-grid,
@@ -200,12 +422,6 @@
   padding: 0.5rem;
   border-radius: 4px;
   word-break: break-all;
-}
-
-.field-hint {
-  font-size: 0.75rem;
-  color: #666;
-  margin-top: 0.25rem;
 }
 
 /* Buttons */
@@ -477,12 +693,6 @@
   margin: 0;
 }
 
-.mint-description {
-  color: #aaa;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-}
-
 .nft-details {
   display: grid;
   gap: 0.75rem;
@@ -500,13 +710,6 @@
 
 .explorer-link:hover {
   background: #333;
-}
-
-/* Linkage verification */
-.panel-description {
-  color: #888;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
 }
 
 .input-group {
@@ -801,5 +1004,36 @@
     background: #fff;
     border-color: #ccc;
     color: #333;
+  }
+
+  .wizard-step {
+    background: #f0f0f0;
+    border-color: #ddd;
+  }
+
+  .wizard-step-name {
+    color: #333;
+  }
+
+  .wizard-step-desc {
+    color: #666;
+  }
+
+  .wizard-step-result {
+    background: rgba(80, 200, 120, 0.08);
+    color: #2a7a2a;
+  }
+
+  .wizard-step-technical code {
+    color: #999;
+  }
+
+  .wizard-step--active .wizard-step-technical code,
+  .wizard-step--done .wizard-step-technical code {
+    color: #777;
+  }
+
+  .wizard-group-header {
+    color: #2a7acc;
   }
 }

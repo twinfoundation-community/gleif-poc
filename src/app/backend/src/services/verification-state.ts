@@ -11,17 +11,6 @@ import { VerificationStateManager, type VerificationResult } from '@gleif/verifi
 const stateManager = new VerificationStateManager({ timeoutMs: 30000 });
 
 /**
- * Register a pending verification and wait for Sally's webhook callback.
- */
-export function registerPendingVerification(
-  credentialSaid: string,
-  leAid: string,
-  leLei: string
-): Promise<VerificationResult> {
-  return stateManager.registerPendingVerification(credentialSaid, leAid, leLei);
-}
-
-/**
  * Resolve a pending verification with the result from Sally's webhook.
  * Returns true if a pending verification was found and resolved.
  */
@@ -33,3 +22,22 @@ export function resolveVerification(
   return stateManager.resolveVerification(credentialSaid, verified, revoked);
 }
 
+/**
+ * Store the completed verification result for browser polling.
+ */
+export function storeCompletedResult(
+  credentialSaid: string,
+  verified: boolean,
+  revoked: boolean,
+  leAid: string,
+  leLei: string
+): void {
+  stateManager.storeCompletedResult(credentialSaid, verified, revoked, leAid, leLei);
+}
+
+/**
+ * Get the completed verification result.
+ */
+export function getCompletedResult(credentialSaid: string): VerificationResult | null {
+  return stateManager.getCompletedResult(credentialSaid);
+}

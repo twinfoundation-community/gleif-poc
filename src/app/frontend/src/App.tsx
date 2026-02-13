@@ -35,6 +35,14 @@ function App() {
       <main className="app-main">
         <PocContext />
 
+        {config?.le.iotaDid && (
+          <div className="panel iota-did-info">
+            <h2>IOTA DID</h2>
+            <label>Pre-issued during setup</label>
+            <code>{config.le.iotaDid}</code>
+          </div>
+        )}
+
         <VerificationPanel
           onConfigLoaded={handleConfigLoaded}
           onVerificationComplete={handleVerificationComplete}
@@ -47,6 +55,8 @@ function App() {
           />
         )}
 
+        <LinkageVerification config={config} />
+
         {verificationResult && (
           <NftAttestationPanel
             verificationResult={verificationResult}
@@ -54,8 +64,6 @@ function App() {
             existingAttestation={nftAttestation}
           />
         )}
-
-        <LinkageVerification config={config} />
       </main>
 
       <footer className="app-footer">

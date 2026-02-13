@@ -7,22 +7,8 @@
 
 import { DidWebsResolver, type DIDDocument } from '@gleif/verifier-core';
 
-/**
- * Get the DID WEBS resolver URL from environment
- */
-function getResolverUrl(): string {
-  if (process.env.DID_WEBS_RESOLVER_URL) {
-    return process.env.DID_WEBS_RESOLVER_URL;
-  }
-
-  const isDocker = process.env.TRUST_ANCHORS_PATH?.includes('/app/config/');
-  return isDocker
-    ? 'http://did-webs-resolver:7677'
-    : 'http://localhost:7677';
-}
-
 const resolver = new DidWebsResolver({
-  resolverUrl: getResolverUrl(),
+  resolverUrl: process.env.DID_WEBS_RESOLVER_URL!,
 });
 
 /**

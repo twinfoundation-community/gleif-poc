@@ -36,7 +36,9 @@ export interface DIDDocument {
 
 /** result from DID linkage verification */
 export interface DidLinkageResult {
+  /** true only when both bidirectional linkage AND DA credential verification passed */
   verified: boolean;
+  /** true when both DID documents reference each other in alsoKnownAs */
   bidirectional?: boolean;
   didWebs?: string;
   didIota?: string;
@@ -57,7 +59,5 @@ export interface DidLinkageResult {
   iotaAlsoKnownAs?: string[];
   /** Whether the Designated Aliases credential was verified (via dkr resolver CESR verification) */
   daVerified?: boolean;
-  /** @deprecated Use websAlsoKnownAs or iotaAlsoKnownAs instead */
-  alsoKnownAs?: string[];
   service?: unknown[];
 }

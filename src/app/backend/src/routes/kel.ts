@@ -6,10 +6,19 @@
  */
 
 import express, { Request, Response, NextFunction } from 'express';
-import { getDidDocument, getKeriCesr, isValidAid, getAvailableAids } from '../services/kel-publisher';
+import { getDidDocument, getKeriCesr, isValidAid, getAvailableAids, publishDidData } from '../services/kel-publisher';
 import { getErrorMessage } from '@gleif/verifier-core';
 
 const router: express.Router = express.Router();
+
+/** Validates AID format and sends a 400 response if invalid. Returns true if invalid (response sent). */
+function rejectInvalidAid(aid: string, res: Response): boolean {
+  if (!isValidAid(aid)) {
+    res.status(400).json({ error: 'Invalid AID format' });
+    return true;
+  }
+  return false;
+}
 
 /**
  * GET /keri/aids
@@ -39,13 +48,7 @@ router.get('/keri/aids', async (_req: Request, res: Response, next: NextFunction
 router.get('/keri/:aid/did.json', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const aid = req.params.aid as string;
-
-    if (!isValidAid(aid)) {
-      res.status(400).json({
-        error: 'Invalid AID format',
-      });
-      return;
-    }
+    if (rejectInvalidAid(aid, res)) return;
 
     // Determine the domain from the request
     const host = req.get('host') || 'localhost:3000';
@@ -77,13 +80,7 @@ router.get('/keri/:aid/did.json', async (req: Request, res: Response, next: Next
 router.get('/keri/:aid/keri.cesr', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const aid = req.params.aid as string;
-
-    if (!isValidAid(aid)) {
-      res.status(400).json({
-        error: 'Invalid AID format',
-      });
-      return;
-    }
+    if (rejectInvalidAid(aid, res)) return;
 
     console.log(`[kel-publisher] Fetching keri.cesr for AID: ${aid}`);
 
@@ -99,6 +96,31 @@ router.get('/keri/:aid/keri.cesr', async (req: Request, res: Response, next: Nex
       });
       return;
     }
+    next(error);
+  }
+});
+
+/**
+ * POST /keri/:aid/publish
+ * Browser pushes DID document + DA CESR after DA credential issuance.
+ */
+router.post('/keri/:aid/publish', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const aid = req.params.aid as string;
+    if (rejectInvalidAid(aid, res)) return;
+
+    const { didDocument, daCesr } = req.body;
+
+    if (!didDocument || !didDocument.id) {
+      res.status(400).json({ error: 'Missing or invalid didDocument in request body' });
+      return;
+    }
+
+    publishDidData(aid, didDocument, daCesr);
+
+    console.log(`[kel-publisher] Published DID data for AID: ${aid}`);
+    res.json({ ok: true });
+  } catch (error) {
     next(error);
   }
 });

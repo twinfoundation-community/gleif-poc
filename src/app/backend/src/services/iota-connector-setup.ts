@@ -16,9 +16,7 @@ import { VaultConnectorFactory } from '@twin.org/vault-models';
 import { IotaWalletConnector } from '@twin.org/wallet-connector-iota';
 import { WalletConnectorFactory } from '@twin.org/wallet-models';
 import { nameof } from '@twin.org/nameof';
-import { getEnvConfig } from './config';
-
-const MNEMONIC_KEY_NAME = 'mnemonic';
+import { getEnvConfig, MNEMONIC_KEY_NAME } from './config';
 
 let vaultConnector: EntityStorageVaultConnector | null = null;
 let walletConnector: IotaWalletConnector | null = null;

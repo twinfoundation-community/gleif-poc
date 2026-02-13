@@ -1,4 +1,4 @@
-import { IotaClient, getFullnodeUrl } from '@iota/iota-sdk/client';
+import { IotaClient } from '@iota/iota-sdk/client';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import {
@@ -6,9 +6,7 @@ import {
   getMnemonic,
   getExplorerUrl,
 } from './iota-connector-setup';
-import { createLeClient } from './sally-client';
-import { getFullConfig, getEnvConfig } from './config';
-import { Cigar, b as signifyBytes } from 'signify-ts';
+import { getEnvConfig } from './config';
 import {
   isoTimestamp,
   buildLinkageVcPayload,
@@ -18,6 +16,7 @@ import {
   type VerificationResult,
   type NftAttestation,
 } from '@gleif/verifier-core';
+import { resolveIotaDid } from './iota-identity-service';
 
 const ATTESTATION_MODULE = 'attestation';
 const ATTESTATION_FUNCTION = 'mint';
@@ -31,44 +30,6 @@ export interface TrustChainInfo {
   gleifAid: string;
   qviAid: string;
   qviCredentialSaid: string;
-}
-
-/**
- * Sign a W3C VC JWT with the LE's KERI key via signify-ts
- */
-async function signVcWithLeKey(
-  linkageInfo: LinkageInfo,
-  lei: string,
-  designatedAliasesSaid: string
-): Promise<{ jwt: string; verificationMethod: string }> {
-  const config = getFullConfig();
-  const client = await createLeClient();
-
-  const aidState = await client.identifiers().get(config.le.name);
-  const currentKey = aidState.state.k[0];
-
-  const verificationMethod = `${linkageInfo.didWebs}#${currentKey}`;
-
-  const payload = buildLinkageVcPayload(
-    linkageInfo.didWebs,
-    linkageInfo.didIota,
-    lei,
-    designatedAliasesSaid
-  );
-  const header = buildVcJwtHeader(verificationMethod);
-  const unsignedJwt = encodeVcAsJwt(header, payload);
-
-  const keeper = client.manager!.get(aidState);
-  const sigs = await keeper.sign(signifyBytes(unsignedJwt), false);
-  const sigQb64 = (sigs as string[])[0];
-
-  const cigar = new Cigar({ qb64: sigQb64 });
-  const signatureBytes = cigar.raw;
-
-  const jwt = assembleSignedJwt(unsignedJwt, signatureBytes);
-  console.log(`[Attestation] Signed VC JWT (${jwt.length} chars)`);
-
-  return { jwt, verificationMethod };
 }
 
 /**
@@ -103,19 +64,41 @@ export async function mintAttestationNft(
     didIota: '',
   };
 
-  const config = getFullConfig();
-  const designatedAliasesSaid = config.designatedAliasesCredential?.said || '';
-  const signedVc = await signVcWithLeKey(
-    effectiveLinkageInfo,
-    verificationResult.leLei,
-    designatedAliasesSaid
-  );
-
   try {
     console.log('[Attestation] Minting vLEI attestation on IOTA testnet...');
 
     const client = new IotaClient({ url: env.iotaNodeUrl });
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic);
+
+    // Build and sign a W3C VC JWT attesting the DID linkage
+    let signedVc = '';
+    let vcVerificationMethod = '';
+
+    if (effectiveLinkageInfo.didIota) {
+      try {
+        // Resolve IOTA DID to get the actual verification method ID
+        const iotaDoc = await resolveIotaDid(effectiveLinkageInfo.didIota);
+        const vm = iotaDoc.verificationMethod?.[0];
+        vcVerificationMethod = vm?.id || `${effectiveLinkageInfo.didIota}#key-0`;
+
+        const vcPayload = buildLinkageVcPayload(
+          effectiveLinkageInfo.didIota,
+          effectiveLinkageInfo.didWebs,
+          verificationResult.leLei,
+          verificationResult.credentialSaid,
+        );
+        const vcHeader = buildVcJwtHeader(vcVerificationMethod);
+        const unsignedJwt = encodeVcAsJwt(vcHeader, vcPayload);
+
+        const encoder = new TextEncoder();
+        const signature = await keypair.sign(encoder.encode(unsignedJwt));
+        signedVc = assembleSignedJwt(unsignedJwt, signature);
+
+        console.log('[Attestation] Signed VC JWT created, kid:', vcVerificationMethod);
+      } catch (vcError) {
+        console.warn('[Attestation] VC signing failed (non-fatal):', vcError);
+      }
+    }
 
     const txb = new Transaction();
     txb.moveCall({
@@ -131,9 +114,9 @@ export async function mintAttestationNft(
         txb.pure.string(trustChainInfo?.qviCredentialSaid || ''),
         txb.pure.u64(Math.floor(Date.now() / 1000)),
         txb.pure.string('TWIN'),
-        txb.pure.string(signedVc.jwt),
-        txb.pure.string(effectiveLinkageInfo.didWebs),
-        txb.pure.string(signedVc.verificationMethod),
+        txb.pure.string(signedVc),
+        txb.pure.string(effectiveLinkageInfo.didIota),
+        txb.pure.string(vcVerificationMethod),
       ],
     });
 
@@ -171,8 +154,8 @@ export async function mintAttestationNft(
         qviCredentialSaid: trustChainInfo?.qviCredentialSaid,
         verifiedAt: isoTimestamp(),
         verifiedBy: 'TWIN',
-        signedVc: signedVc.jwt,
-        vcVerificationMethod: signedVc.verificationMethod,
+        signedVc: signedVc || undefined,
+        vcVerificationMethod: vcVerificationMethod || undefined,
       },
     };
   } catch (error) {

@@ -10,6 +10,7 @@ import {
 } from './identity-connector-setup';
 import { setAlsoKnownAs } from './iota-also-known-as';
 import { getErrorMessage } from '@gleif/verifier-core';
+import { CONTROLLER_IDENTITY } from './config';
 
 /**
  * DID Document interface (W3C compliant)
@@ -30,11 +31,6 @@ export interface IotaDidDocument {
   }>;
   [key: string]: unknown;
 }
-
-/**
- * The identity/controller name (must match IOTA connector identity)
- */
-const CONTROLLER_IDENTITY = process.env.NFT_IDENTITY || 'attestation-service';
 
 /** In-memory cache for resolved DID documents. */
 const didCache = new Map<string, IotaDidDocument>();

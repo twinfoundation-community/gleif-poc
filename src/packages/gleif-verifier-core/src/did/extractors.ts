@@ -1,13 +1,13 @@
 import type { DIDDocument } from '../types/did.js';
 
-/** pull the first did:iota from a document's alsoKnownAs */
-export function extractIotaDid(doc: DIDDocument): string | null {
+/** pull the first alsoKnownAs entry matching a given DID's prefix */
+function extractDidByPrefix(doc: DIDDocument, prefix: string): string | null {
   if (!doc.alsoKnownAs || !Array.isArray(doc.alsoKnownAs)) {
     return null;
   }
 
   for (const alias of doc.alsoKnownAs) {
-    if (typeof alias === 'string' && alias.startsWith('did:iota:')) {
+    if (typeof alias === 'string' && alias.startsWith(prefix)) {
       return alias;
     }
   }
@@ -15,19 +15,14 @@ export function extractIotaDid(doc: DIDDocument): string | null {
   return null;
 }
 
+/** pull the first did:iota from a document's alsoKnownAs */
+export function extractIotaDid(doc: DIDDocument): string | null {
+  return extractDidByPrefix(doc, 'did:iota:');
+}
+
 /** pull the first did:webs from a document's alsoKnownAs */
 export function extractWebsDid(doc: DIDDocument): string | null {
-  if (!doc.alsoKnownAs || !Array.isArray(doc.alsoKnownAs)) {
-    return null;
-  }
-
-  for (const alias of doc.alsoKnownAs) {
-    if (typeof alias === 'string' && alias.startsWith('did:webs:')) {
-      return alias;
-    }
-  }
-
-  return null;
+  return extractDidByPrefix(doc, 'did:webs:');
 }
 
 /**

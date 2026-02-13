@@ -7,7 +7,7 @@
  */
 
 import type { SignifyClient } from 'signify-ts';
-import { keriKeyToJwk, type KeriKeyState, type DIDDocument } from '@gleif/verifier-core';
+import { buildWebsDidDocument, type KeriKeyState, type DIDDocument } from '@gleif/verifier-core';
 
 const DEFAULT_DA_SCHEMA_SAID = 'EN6Oh5XSD5_q2Hgu-aqpdfbVepdpYpFlgz6zvJL5b_r5';
 const DEFAULT_DA_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -20,28 +20,6 @@ interface KelPublisherConfig {
   designatedAliasesSchemaSaid?: string;
   /** Cache TTL for DA credentials in ms (default: 300000 = 5 min) */
   daCacheTtlMs?: number;
-}
-
-/**
- * Verification method in a did:webs DID document (JWK format)
- */
-interface DidWebsVerificationMethod {
-  id: string;
-  type: string;
-  controller: string;
-  publicKeyJwk: {
-    kid: string;
-    kty: string;
-    crv: string;
-    x: string;
-  };
-}
-
-/**
- * Internal DID document structure for did:webs
- */
-interface DidWebsDocument extends DIDDocument {
-  verificationMethod: DidWebsVerificationMethod[];
 }
 
 /**
@@ -100,51 +78,6 @@ export class KelPublisher {
     }
   }
 
-  /** build a DID document from KERI key state */
-  private buildDidDocument(
-    aid: string,
-    keyState: KeriKeyState,
-    domain: string,
-    path: string,
-    alsoKnownAs?: string[],
-  ): DidWebsDocument {
-    const didId = path
-      ? `did:webs:${domain}:${path}:${aid}`
-      : `did:webs:${domain}:${aid}`;
-
-    const verificationMethods: DidWebsVerificationMethod[] = keyState.k.map((key: string) => {
-      const jwk = keriKeyToJwk(key);
-      return {
-        id: `#${key}`,
-        type: 'JsonWebKey',
-        controller: didId,
-        publicKeyJwk: {
-          kid: jwk.kid || key,
-          kty: jwk.kty,
-          crv: jwk.crv || 'Ed25519',
-          x: jwk.x || '',
-        },
-      };
-    });
-
-    const doc: DidWebsDocument = {
-      id: didId,
-      verificationMethod: verificationMethods,
-      service: [],
-    };
-
-    if (alsoKnownAs && alsoKnownAs.length > 0) {
-      const didKeriId = `did:keri:${aid}`;
-      const didWebId = path
-        ? `did:web:${domain}:${path}:${aid}`
-        : `did:web:${domain}:${aid}`;
-      const extras = [didKeriId, didWebId].filter(id => !alsoKnownAs.includes(id));
-      doc.alsoKnownAs = [...alsoKnownAs, ...extras];
-    }
-
-    return doc;
-  }
-
   /** get the DID document for a KERI AID */
   async getDidDocument(
     aid: string,
@@ -172,7 +105,7 @@ export class KelPublisher {
       try {
         const keyStates = await client.keyStates().get(aid);
         if (keyStates && keyStates.length > 0) {
-          return this.buildDidDocument(aid, keyStates[0], domain, path, alsoKnownAs);
+          return buildWebsDidDocument({ aid, keyState: keyStates[0], domain, path, alsoKnownAs });
         }
       } catch {
         // Fall through to HTTP fallback
@@ -187,7 +120,7 @@ export class KelPublisher {
 
       if (response.ok) {
         const keyState = await response.json() as KeriKeyState;
-        return this.buildDidDocument(aid, keyState, domain, path, alsoKnownAs);
+        return buildWebsDidDocument({ aid, keyState, domain, path, alsoKnownAs });
       }
     } catch {
       // Fall through to error

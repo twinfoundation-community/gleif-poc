@@ -189,7 +189,7 @@ Signify client only. KERIA stores encrypted key material it can't decrypt. All s
 Revocation is recorded in the TEL (Transaction Event Log), anchored to the issuer's KEL. Sally checks revocation status at every level -- a revoked credential anywhere in the chain fails the entire verification.
 
 **Q: What's the on-chain attestation for?**
-Optional public record on IOTA. The attestation is a custom Move object (`VleiAttestation`) with typed fields (LEI, DIDs, trust chain) and a W3C VC JWT signed by the LE's KERI key. Verifiable using the LE's public key (via `did:webs`) with standard Ed25519/WebCrypto -- no KERI infrastructure needed.
+Optional public record on IOTA. The attestation is a custom Move object (`VleiAttestation`) with typed fields (LEI, DIDs, trust chain) and a W3C VC JWT signed by the IOTA wallet key (the `did:iota` controller's key). The JWT's `iss` is the `did:iota`, so verification resolves the key from the IOTA DID document (standard Ed25519/WebCrypto, no KERI infrastructure). Sally already verified the full KERI credential chain; the attestation records that fact. Trust chains back to GLEIF via the bidirectional `alsoKnownAs` binding.
 
 **Q: How does `did:webs` resolution work?**
 The identifier encodes a domain and AID (e.g., `did:webs:example.com:keri:EBfd...`). Resolution fetches (1) a DID document at `/keri/{AID}/did.json` and (2) a CESR event stream at `/keri/{AID}/keri.cesr`. The resolver (dws) verifies the CESR stream -- the DID document is only trustworthy if the CESR proof checks out.
@@ -314,6 +314,8 @@ The Designated Aliases credential as it appears in the KERI CESR stream:
 }
 ```
 
+Note: no `@context`. The did:webs spec explicitly requires pure JSON -- no JSON-LD context. The dkr resolver generates its own DID document from the CESR stream and does a strict deep equality comparison against the served `did.json`. Adding `@context` would cause that comparison to fail. Consumers that need JSON-LD processing can prepend `@context` themselves.
+
 The `verificationMethod` exposes the LE's Ed25519 public key in JWK format. The `kid` is the KERI qualified key identifier (`D` prefix = Ed25519). The `alsoKnownAs` includes identifiers from the Designated Aliases credential plus `did:keri` and `did:web` equivalents of the AID.
 
 ### What a `did:iota` Document Looks Like
@@ -370,7 +372,7 @@ The OOBI says: "to discover data about `ELyw5WNs...`, ask the KERIA agent at `EP
 
 [IOTA Explorer](https://explorer.iota.org/object/0x5783fd6ce2abc6f28302f1ff89073d0bb6614ad06449d49a514c51a1cd0f5488?network=testnet)
 
-A custom Move attestation object (`VleiAttestation`, package `0xd4d6f6488091e275ff59bcbe1999af90737ce1b5b866085284ceb262c7bdf9de`) stores typed Move object fields with a W3C VC JWT signed by the LE's KERI Ed25519 key. Anyone can verify the JWT using the public key from the `did:webs` document -- no KERI infrastructure needed.
+A custom Move attestation object (`VleiAttestation`, package `0xd4d6f6488091e275ff59bcbe1999af90737ce1b5b866085284ceb262c7bdf9de`) stores typed Move object fields with a W3C VC JWT signed by the IOTA wallet key (the `did:iota` controller's Ed25519 key). Anyone can verify the JWT using the public key from the `did:iota` document -- no KERI infrastructure needed. The trust link back to GLEIF is the bidirectional `alsoKnownAs` binding plus Sally's prior credential chain verification.
 
 ### Sally Verifier
 

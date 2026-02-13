@@ -3,16 +3,25 @@
  *
  * thin wrapper around KelPublisher from @gleif/verifier-node.
  * configures with poc-specific trust anchor credentials.
+ *
+ * The LE's DID document and DA CESR are published by the browser after
+ * DA credential issuance - the backend just caches and servs them.
+ * Only QVI/GLEIF AIDs still use a SignifyClient on the backend.
  */
 
 import { ready, SignifyClient, Tier } from 'signify-ts';
 import { KelPublisher, type DIDDocument } from '@gleif/verifier-node';
+import { paddedSignifyPasscode } from '@gleif/verifier-core';
 import { getEnvConfig, loadTrustAnchors } from './config';
 import type { TrustAnchorConfig } from '../types/index';
 
 // Cache for initialized clients
 let signifyReady = false;
 const clientCache: Map<string, SignifyClient> = new Map();
+
+// Browser-published data cache
+const publishedDidDocs: Map<string, DIDDocument> = new Map();
+const publishedDaCesr: Map<string, string> = new Map();
 
 async function ensureSignifyReady(): Promise<void> {
   if (!signifyReady) {
@@ -21,7 +30,10 @@ async function ensureSignifyReady(): Promise<void> {
   }
 }
 
-/** get or create a SignifyClient for an agent */
+/**
+ * Get or create a SignifyClient for an agent.
+ * Returns null for the LE AID; the browser publishes LE data directly.
+ */
 async function getClientForAid(aid: string): Promise<SignifyClient | null> {
   await ensureSignifyReady();
 
@@ -35,14 +47,15 @@ async function getClientForAid(aid: string): Promise<SignifyClient | null> {
     return null;
   }
 
-  // Match AID to trust anchor entry
+  // LE is handled by browser-published cache
+  if (trustAnchors.le?.aid === aid) {
+    return null;
+  }
+
   let passcode: string | null = null;
   let cacheKey: string | null = null;
 
-  if (trustAnchors.le?.aid === aid) {
-    passcode = trustAnchors.le.passcode;
-    cacheKey = 'le';
-  } else if (trustAnchors.qvi?.aid === aid) {
+  if (trustAnchors.qvi?.aid === aid) {
     passcode = trustAnchors.qvi.passcode;
     cacheKey = 'qvi';
   } else if (trustAnchors.gleif?.aid === aid) {
@@ -52,7 +65,6 @@ async function getClientForAid(aid: string): Promise<SignifyClient | null> {
 
   if (!passcode || !cacheKey) return null;
 
-  // Check cache by role key too
   const cachedByRole = clientCache.get(cacheKey);
   if (cachedByRole) {
     clientCache.set(aid, cachedByRole);
@@ -60,7 +72,7 @@ async function getClientForAid(aid: string): Promise<SignifyClient | null> {
   }
 
   const env = getEnvConfig();
-  const paddedPasscode = passcode.padEnd(21, '_');
+  const paddedPasscode = paddedSignifyPasscode(passcode);
   const client = new SignifyClient(env.keriaUrl, paddedPasscode, Tier.low, env.keriaBootUrl);
 
   try {
@@ -90,14 +102,33 @@ function getPublisher(): KelPublisher {
   return publisherInstance;
 }
 
-/** get the DID document for an AID */
-export function getDidDocument(aid: string, domain: string, path: string): Promise<DIDDocument> {
+/** Store browser-published DID data for an AID */
+export function publishDidData(aid: string, didDocument: DIDDocument, daCesr?: string): void {
+  publishedDidDocs.set(aid, didDocument);
+  if (daCesr) {
+    publishedDaCesr.set(aid, daCesr);
+  }
+  console.log(`[kel-publisher] Cached published DID data for AID: ${aid} (daCesr: ${!!daCesr})`);
+}
+
+/** get the DID document for an AID -- checks browser-published cache first */
+export async function getDidDocument(aid: string, domain: string, path: string): Promise<DIDDocument> {
+  const cached = publishedDidDocs.get(aid);
+  if (cached) return cached;
+
   return getPublisher().getDidDocument(aid, domain, path);
 }
 
-/** get KERI CESR data for an AID */
-export function getKeriCesr(aid: string): Promise<string> {
-  return getPublisher().getKeriCesr(aid);
+/** get KERI CESR data for an AID -- appends browser-published DA CESR if available */
+export async function getKeriCesr(aid: string): Promise<string> {
+  const baseCesr = await getPublisher().getKeriCesr(aid);
+
+  const daCesr = publishedDaCesr.get(aid);
+  if (daCesr) {
+    return baseCesr + daCesr;
+  }
+
+  return baseCesr;
 }
 
 /** check if an AID is valid -- basic format check */

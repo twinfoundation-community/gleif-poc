@@ -1,6 +1,6 @@
 import type { PublicTrustChainConfig, VerificationResult, NftAttestation, DidLinkageResult } from '@gleif/verifier-core';
 
-const API_BASE = 'http://localhost:3000';
+export const API_BASE = 'http://localhost:3000';
 
 export class ApiError extends Error {
   status?: number;
@@ -25,22 +25,13 @@ export async function fetchConfig(): Promise<PublicTrustChainConfig> {
   return handleResponse<PublicTrustChainConfig>(response);
 }
 
-export async function verifyCredential(): Promise<VerificationResult> {
-  const response = await fetch(`${API_BASE}/api/verify`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  return handleResponse<VerificationResult>(response);
-}
-
-export async function mintNft(): Promise<NftAttestation> {
+export async function mintNft(verificationResult?: VerificationResult): Promise<NftAttestation> {
   const response = await fetch(`${API_BASE}/api/nft/mint`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify(verificationResult ? { verificationResult } : {}),
   });
   return handleResponse<NftAttestation>(response);
 }
