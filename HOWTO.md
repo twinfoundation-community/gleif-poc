@@ -226,6 +226,6 @@ echo '{}' > scripts/.trust-anchors.json
 ```bash
 cd local-stack
 ./stop.sh
-podman volume rm resolver-data 2>/dev/null
+docker volume rm resolver-data 2>/dev/null
 ./start.sh --with-backend
 ```
