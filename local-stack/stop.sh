@@ -6,7 +6,10 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 cd "$QVI_DIR"
 
 echo "stopping local vLEI stack..."
-$COMPOSE_CMD -f docker-compose-keria_signify_qvi.yaml -f "$NAMES_OVERRIDE" down
+# only stop the services we actually start (the upstream yaml defines extras we don't use)
+$COMPOSE_CMD -f docker-compose-keria_signify_qvi.yaml -f "$NAMES_OVERRIDE" rm -sf \
+    vlei-server gar-witnesses qar-witnesses person-witnesses keria1 hook direct-sally 2>/dev/null || true
+$COMPOSE_CMD -f docker-compose-keria_signify_qvi.yaml -f "$NAMES_OVERRIDE" down 2>/dev/null || true
 
 # stop did-webs-resolver
 echo "stopping did-webs-resolver..."

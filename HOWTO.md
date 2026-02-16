@@ -41,6 +41,9 @@ Give it ~30s for all services to come up healthy.
 **Important:** The backend must be running (`--with-backend` flag) to enable automatic IOTA DID creation.
 
 ```bash
+# build workspace packages first
+npm run build:packages
+
 cd scripts
 npm install
 npm run setup-trust-anchors
@@ -102,6 +105,8 @@ Opens at http://localhost:5173. If that port's taken, Vite auto-increments -- ch
    - Both should show "Linked & Verified" with "Bidirectional" badge
 
 ### Option B: Via API
+
+> **Note:** DID linkage verification (Direction 1 & 2) requires the frontend to have run at least once -- it publishes the LE's DID document to the backend via `POST /keri/:aid/publish`. Without that, the did:webs resolver can't fetch the LE's `did.json`.
 
 ```bash
 # Get trust chain config (includes linked DIDs)
